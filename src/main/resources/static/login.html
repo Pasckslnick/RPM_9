@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZEEKR · Вход</title>
+    <link rel="stylesheet" href="/css/zeekr.css">
+</head>
+<body>
+
+<div class="menu">
+    <img src="/logotipe.jpg" alt="ZEEKR">
+    <nav class="razdelu">
+        <a href="/">Главная</a>
+        <a href="/register.html">Регистрация</a>
+    </nav>
+</div>
+
+<div class="page">
+    <div class="auth-wrap card">
+        <h1>ZEEKR</h1>
+        <p class="subtitle">Access the future</p>
+
+        <div id="error" class="auth-error" style="display:none"></div>
+
+        <form id="loginForm" autocomplete="on">
+            <label>Логин
+                <input type="text" id="username" required autofocus autocomplete="username">
+            </label>
+
+            <label>Пароль
+                <div class="pw-field">
+                    <input type="password" id="password" required autocomplete="current-password">
+                    <button type="button" class="pw-toggle" tabindex="-1" aria-label="Показать пароль"></button>
+                    <div class="pw-face facing" aria-hidden="true"></div>
+                </div>
+            </label>
+
+            <button type="submit" class="primary" style="width:100%">Войти</button>
+        </form>
+
+        <div class="auth-link">
+            Нет аккаунта? <a href="/register.html">Зарегистрироваться</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const errorEl = document.getElementById('error');
+        errorEl.style.display = 'none';
+
+        const pwInput = document.getElementById('password');
+        const password = (pwInput.realValue !== undefined)
+            ? pwInput.realValue
+            : pwInput.value;
+
+        const body = {
+            username: document.getElementById('username').value.trim(),
+            password: password
+        };
+
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            if (!res.ok) {
+                let msg = 'HTTP ' + res.status;
+                try { const d = await res.json(); msg = d.message || d.error || msg; } catch(_) {}
+                throw new Error(msg);
+            }
+
+            const data = await res.json();
+            localStorage.setItem('positions_jwt', data.token);
+            window.location.href = '/index.html';
+        } catch (err) {
+            errorEl.textContent = 'Ошибка входа: ' + err.message;
+            errorEl.style.display = 'block';
+        }
+    });
+</script>
+
+<script src="/js/password.js"></script>
+</body>
+</html>

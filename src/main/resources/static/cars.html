@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZEEKR · Модели</title>
+    <link rel="stylesheet" href="/css/zeekr.css">
+    <style>
+        /* ==== HERO ==== */
+        .cars-hero {
+            position: relative;
+            padding: 110px 20px 70px;
+            text-align: center;
+            background:
+                    radial-gradient(ellipse at 50% 0%, rgba(0,200,255,0.16), transparent 60%),
+                    linear-gradient(180deg, #0a0f22 0%, #05070f 100%);
+            border-bottom: 1px solid var(--line);
+        }
+        .cars-hero h1 {
+            margin: 0 0 14px;
+            letter-spacing: 12px;
+            font-size: clamp(34px, 5vw, 58px);
+            color: #fff;
+        }
+        .cars-hero h1 span { color: var(--muted); }
+        .cars-hero p { color: var(--muted); letter-spacing: 2px; }
+
+        /* ==== Filters ==== */
+        .cars-filters {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin: 32px 0 28px;
+            flex-wrap: wrap;
+        }
+        .cars-filters input[type="text"] {
+            margin: 0;
+            width: 320px;
+            max-width: 100%;
+            border-radius: 999px;
+            padding: 14px 22px;
+        }
+        .cars-select {
+            margin: 0;
+            padding: 14px 40px 14px 20px;
+            border-radius: 999px;
+            background: #0f0f0f;
+            border: 1px solid var(--line);
+            color: var(--text);
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239a9a9a' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 16px;
+            cursor: pointer;
+            font: inherit;
+        }
+
+        /* ==== Grid ==== */
+        .cars-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 24px;
+        }
+        @media (max-width: 720px) { .cars-grid { grid-template-columns: 1fr; } }
+
+        .car-card {
+            background: linear-gradient(180deg, #161616 0%, #101010 100%);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform .35s var(--ease), border-color .35s var(--ease), box-shadow .35s var(--ease);
+            display: flex;
+            flex-direction: column;
+        }
+        .car-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--line-strong);
+            box-shadow: 0 24px 60px rgba(0,0,0,0.55);
+        }
+        .car-card__img {
+            height: 220px;
+            background-size: cover;
+            background-position: center;
+            background-color: #1c1c1c;
+            transition: transform .9s var(--ease);
+        }
+        .car-card:hover .car-card__img { transform: scale(1.04); }
+        .car-card__body { padding: 22px 24px 24px; }
+        .car-card__title {
+            margin: 0 0 8px;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #ff5a5a;
+            text-transform: uppercase;
+        }
+        .car-card__subtitle {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 0 0 16px;
+            min-height: 42px;
+        }
+        .car-card__specs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .chip {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: #0f0f0f;
+            color: var(--text);
+            font-size: 12px;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+        .car-card__price { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: 1px; }
+        .car-card__actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+
+        /* ==== Big model modal ==== */
+        .model-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 40px 16px;
+            z-index: 200;
+            overflow-y: auto;
+        }
+        .model-modal.hidden { display: none; }
+
+        .model-modal__panel {
+            position: relative;
+            background: #0e0e0e;
+            color: var(--text);
+            width: 1100px;
+            max-width: 100%;
+            border: 1px solid var(--line-strong);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 40px 120px rgba(0,0,0,0.8);
+            animation: modelIn .35s var(--ease) both;
+        }
+        @keyframes modelIn {
+            from { opacity: 0; transform: translateY(20px) scale(.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .model-modal__close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.5);
+            color: #fff;
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+            z-index: 3;
+            transition: background .2s ease;
+        }
+        .model-modal__close:hover { background: rgba(255,90,90,0.6); }
+
+        .model-modal__hero {
+            position: relative;
+            height: 380px;
+            background-size: cover;
+            background-position: center;
+            background-color: #1c1c1c;
+        }
+        .model-modal__hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(14,14,14,0.95) 100%);
+        }
+        .model-modal__hero-inner {
+            position: absolute;
+            left: 40px;
+            right: 40px;
+            bottom: 28px;
+            z-index: 2;
+        }
+        .model-modal__hero h2 {
+            margin: 0 0 8px;
+            font-size: clamp(28px, 4vw, 44px);
+            font-weight: 700;
+            letter-spacing: 4px;
+            color: #fff;
+            text-transform: uppercase;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.6);
+        }
+        .model-modal__hero p { color: var(--muted); font-size: 15px; max-width: 720px; line-height: 1.6; margin: 0; }
+
+        .model-modal__body { padding: 32px 40px 40px; }
+
+        .model-specs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 18px;
+            padding: 22px;
+            background: #141414;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            margin-bottom: 32px;
+        }
+        .model-spec { display: flex; flex-direction: column; gap: 6px; }
+        .model-spec__label {
+            font-size: 10px; letter-spacing: 2.5px;
+            text-transform: uppercase; color: var(--dim);
+        }
+        .model-spec__value { font-size: 16px; color: #fff; }
+
+        .model-modal__title {
+            font-size: 14px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin: 0 0 18px;
+        }
+
+        .comp-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .comp-tab {
+            padding: 12px 22px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: #0f0f0f;
+            color: var(--muted);
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all .25s var(--ease);
+        }
+        .comp-tab:hover { color: #fff; border-color: var(--line-strong); }
+        .comp-tab.active {
+            background: #ffffff;
+            color: #0a0a0a;
+            border-color: transparent;
+        }
+
+        .comp-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+        @media (max-width: 700px) { .comp-panel { grid-template-columns: 1fr; } }
+
+        .comp-panel__specs {
+            background: #141414;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 22px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+        .comp-panel__spec { display: flex; flex-direction: column; gap: 4px; }
+        .comp-panel__spec .label {
+            font-size: 10px; letter-spacing: 2px;
+            text-transform: uppercase; color: var(--dim);
+        }
+        .comp-panel__spec .value { color: #fff; font-size: 16px; }
+
+        .comp-panel__side {
+            background: #141414;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 14px;
+        }
+        .comp-panel__price {
+            font-size: 26px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+        .comp-panel__actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+        .model-modal__actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            border-top: 1px solid var(--line);
+            padding-top: 22px;
+        }
+        #tdModal {
+            z-index: 400;
+        }
+        .modal.hidden { display: none; }
+
+        .cars-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--dim);
+            padding: 60px 0;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="menu">
+    <img src="/images/logotipe.png" alt="ZEEKR">
+    <nav class="razdelu">
+        <a href="/index.html">Главная</a>
+        <a href="/news.html">Новости</a>
+        <a href="/dealers.html">Дилеры</a>
+        <a href="/test_drives.html">Тест-драйвы</a>
+        <a href="/cards.html">Корзины</a>
+        <a href="/profile.html">Профиль</a>
+    </nav>
+</div>
+
+<section class="cars-hero">
+    <h1>Модели <span>ZEEKR</span></h1>
+    <p>Выберите модель, чтобы увидеть все комплектации и характеристики</p>
+</section>
+
+<div class="page">
+
+    <div class="cars-filters">
+        <input type="text" id="searchInput" placeholder="Поиск модели...">
+
+        <select id="sortSelect" class="cars-select">
+            <option value="default">Сортировка</option>
+            <option value="price-asc">Цена ↑</option>
+            <option value="price-desc">Цена ↓</option>
+            <option value="year-desc">Год выпуска ↓</option>
+        </select>
+
+        <select id="bodySelect" class="cars-select">
+            <option value="">Кузов: любой</option>
+            <option value="Седан">Седан</option>
+            <option value="Кроссовер">Кроссовер</option>
+            <option value="Универсал">Универсал</option>
+            <option value="Минивэн">Минивэн</option>
+        </select>
+
+        <button id="addBtn" class="primary" style="margin-left:auto; display:none;">+ Добавить модель</button>
+    </div>
+
+    <div class="cars-grid" id="carsGrid">
+        <p class="cars-empty">Загрузка...</p>
+    </div>
+
+    <div id="pagination" class="pagination"></div>
+</div>
+
+<!-- ==== Модалка записи на тест-драйв ==== -->
+<div id="tdModal" class="modal hidden">
+    <div class="modal-content">
+        <h2 id="tdModalTitle">Запись на тест-драйв</h2>
+        <form id="tdForm">
+            <label>Модель
+                <input type="text" id="tdModelName" readonly>
+            </label>
+
+            <label>Комплектация
+                <select id="tdComplecttion" required>
+                    <option value="">— выберите комплектацию —</option>
+                </select>
+            </label>
+
+            <label>Дилер
+                <select id="tdDealer" required>
+                    <option value="">— выберите дилера —</option>
+                </select>
+            </label>
+
+            <label>Дата тест-драйва
+                <input type="date" id="tdDate" required>
+            </label>
+
+            <label>Комментарий
+                <textarea id="tdComment" required minlength="3" maxlength="255"
+                          placeholder="Например: хочу приехать в субботу"></textarea>
+            </label>
+
+            <div class="modal-actions">
+                <button type="button" id="tdCancelBtn" class="ghost">Отмена</button>
+                <button type="submit" class="primary">Записаться</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="model-modal hidden" id="modelModal">
+    <div class="model-modal__panel">
+        <button class="model-modal__close" id="modelModalClose">✕</button>
+
+        <div class="model-modal__hero" id="modelHero">
+            <div class="model-modal__hero-inner">
+                <h2 id="modelTitle"></h2>
+                <p id="modelDescr"></p>
+            </div>
+        </div>
+
+        <div class="model-modal__body">
+            <div class="model-specs" id="modelSpecs"></div>
+
+            <h3 class="model-modal__title">Комплектации</h3>
+            <div class="comp-tabs" id="compTabs"></div>
+
+            <div id="compPanel"></div>
+
+            <div class="model-modal__actions">
+                <button class="primary" id="testDriveBtn">Записаться на тест-драйв</button>
+                <button class="ghost" id="cartBtn">В корзину</button>
+                <button class="ghost" id="editModelBtn" style="display:none;">Изменить модель</button>
+                <button class="danger" id="deleteModelBtn" style="display:none;">Удалить модель</button>
+                <button class="primary" id="addCompBtn" style="display:none;">+ Добавить комплектацию</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal" class="modal hidden">
+    <div class="modal-content">
+        <h2 id="modalTitle">Добавить модель</h2>
+        <form id="carForm">
+            <input type="hidden" id="itemId">
+
+            <label>Название модели
+                <input type="text" id="itemModelName" required minlength="2" maxlength="120">
+            </label>
+            <label>Тип кузова
+                <input type="text" id="itemBodyType" required minlength="2" maxlength="80">
+            </label>
+            <label>Описание
+                <textarea id="itemDescription" required minlength="5" maxlength="500"></textarea>
+            </label>
+            <label>Базовая цена, ₽
+                <input type="number" id="itemBasePrice" step="0.01" min="0.01" required>
+            </label>
+            <label>Год выпуска
+                <input type="number" id="itemReleaseYear" min="2000" max="2100" required>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;">
+                <input type="checkbox" id="itemAvailable" checked style="width:auto;">
+                Доступна к заказу
+            </label>
+
+            <div class="modal-actions">
+                <button type="button" id="cancelBtn" class="ghost">Отмена</button>
+                <button type="submit" class="primary">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="compModal" class="modal hidden">
+    <div class="modal-content">
+        <h2 id="compModalTitle">Комплектация</h2>
+        <form id="compForm">
+            <input type="hidden" id="compId">
+            <input type="hidden" id="compCarModelId">
+
+            <label>Название комплектации
+                <input type="text" id="compName" required minlength="2" maxlength="120">
+            </label>
+            <label>Батарея, кВт·ч
+                <input type="number" id="compBattery" step="0.1" min="0.1" required>
+            </label>
+            <label>Мощность, л.с.
+                <input type="number" id="compPower" min="1" required>
+            </label>
+            <label>Запас хода, км
+                <input type="number" id="compRange" min="1" required>
+            </label>
+            <label>Максимальная скорость, км/ч
+                <input type="number" id="compMaxSpeed" min="1" required>
+            </label>
+            <label>Цена, ₽
+                <input type="number" id="compPrice" step="0.01" min="0.01" required>
+            </label>
+
+            <div class="modal-actions">
+                <button type="button" id="compCancelBtn" class="ghost">Отмена</button>
+                <button type="submit" class="primary">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="/js/api.js"></script>
+<script src="/js/cars.js"></script>
+</body>
+</html>

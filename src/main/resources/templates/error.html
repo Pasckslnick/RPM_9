@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${status} + ' · ' + ${title} + ' — ZEEKR'">ZEEKR · Ошибка</title>
+    <link rel="stylesheet" th:href="@{/css/zeekr.css}">
+    <style>
+        .error-wrap {
+            position: relative; z-index: 2;
+            min-height: calc(100vh - 70px);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 40px 20px; text-align: center;
+        }
+        .error-icon {
+            font-size: 40px; margin-bottom: 14px; opacity: .9;
+            filter: drop-shadow(0 0 12px rgba(80,200,255,0.5));
+        }
+        .error-code {
+            font-size: 160px; font-weight: 200;
+            letter-spacing: 16px; line-height: 1;
+            color: #eaf6ff;
+            text-shadow:
+                    0 0 6px  #4fd1ff,
+                    0 0 22px #4fd1ff,
+                    0 0 60px rgba(80, 200, 255, 0.7);
+            animation: pulse 3s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%,100% { text-shadow: 0 0 6px #4fd1ff, 0 0 22px #4fd1ff, 0 0 60px rgba(80,200,255,0.7); }
+            50%     { text-shadow: 0 0 12px #7bdcff, 0 0 32px #7bdcff, 0 0 80px rgba(80,220,255,0.95); }
+        }
+        .error-title {
+            font-size: 20px; letter-spacing: 6px;
+            text-transform: uppercase; color: #9fdfff;
+            margin: 12px 0 16px; font-weight: 300;
+        }
+        .error-desc {
+            font-size: 15px; color: #8aa8c8;
+            max-width: 560px; line-height: 1.65;
+            margin-bottom: 28px; letter-spacing: .5px;
+        }
+        .error-meta {
+            font-family: 'Consolas', monospace;
+            font-size: 12px; color: #587a9c;
+            margin-bottom: 34px; letter-spacing: 1px;
+        }
+        .error-meta span { color: #8ab7d6; }
+        .btn-row { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+
+        @media (max-width: 600px) {
+            .error-code { font-size: 90px; letter-spacing: 8px; }
+            .error-title { font-size: 15px; letter-spacing: 4px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="menu">
+    <img src="/logotipe.jpg" alt="ZEEKR">
+    <nav class="razdelu">
+        <a href="/">Главная</a>
+        <a href="/positions.html">Должности</a>
+        <a href="/login.html">Войти</a>
+    </nav>
+</div>
+
+<div class="error-wrap">
+
+    <div class="error-icon" th:text="${icon}">⛔</div>
+    <div class="error-code" th:text="${status}">403</div>
+    <div class="error-title" th:text="${title}">Доступ запрещён</div>
+
+    <div class="error-desc" th:text="${description}">
+        У вас нет прав для просмотра этой страницы.
+    </div>
+
+    <div class="error-meta" th:if="${path != null}">
+        путь · <span th:text="${path}">/api/positions</span>
+        <span th:if="${exception != null}"> · </span>
+        <span th:if="${exception != null}" th:text="${exception}">AccessDeniedException</span>
+    </div>
+
+    <div class="btn-row">
+        <a class="btn primary" href="/">Главная страница</a>
+        <a class="btn ghost"   href="/login.html">Войти заново</a>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZEEKR · Новости</title>
+    <link rel="stylesheet" href="/css/zeekr.css">
+    <style>
+        /* ---- Hero ---- */
+        .news-hero {
+            position: relative;
+            margin-bottom: 56px;
+            padding: 60px 0 40px;
+        }
+        .news-hero h1 {
+            text-align: center;
+            font-size: clamp(32px, 5vw, 56px);
+            letter-spacing: 10px;
+            margin: 0 0 16px;
+        }
+        .news-hero p {
+            text-align: center;
+            color: var(--muted);
+            font-size: 14px;
+            letter-spacing: 2px;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        /* ---- Сетка карточек ---- */
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 28px;
+        }
+        @media (max-width: 720px) {
+            .news-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ---- Карточка ---- */
+        .news-card {
+            display: flex;
+            gap: 20px;
+            background: linear-gradient(180deg, #161616 0%, #101010 100%);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 20px;
+            transition: transform .35s var(--ease),
+            border-color .35s var(--ease),
+            box-shadow .35s var(--ease);
+            cursor: pointer;
+        }
+        .news-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--line-strong);
+            box-shadow: 0 24px 60px rgba(0,0,0,0.55);
+        }
+
+        .news-card__img {
+            width: 130px;
+            height: 130px;
+            flex-shrink: 0;
+            border-radius: 10px;
+            background-size: cover;
+            background-position: center;
+            background-color: #1c1c1c;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .news-card__body {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .news-card__title {
+            margin: 0 0 8px;
+            font-size: 20px;
+            font-weight: 500;
+            letter-spacing: .5px;
+            color: #fff;
+            line-height: 1.25;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .news-card__meta {
+            font-size: 12px;
+            color: var(--dim);
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+        .news-card__excerpt {
+            font-size: 14px;
+            color: var(--muted);
+            line-height: 1.55;
+            margin-bottom: 14px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .news-card__more {
+            margin-top: auto;
+            color: #ff5a5a;
+            font-size: 13px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            transition: color .25s var(--ease);
+        }
+        .news-card:hover .news-card__more {
+            color: #ff8080;
+        }
+
+        /* ---- Кнопка «Добавить» в hero ---- */
+        .news-hero-actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 24px;
+        }
+
+        /* ---- Модалка статьи ---- */
+        .article-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 40px 16px;
+            z-index: 200;
+            overflow-y: auto;
+            animation: fadeIn .3s var(--ease) both;
+        }
+        .article-modal.hidden { display: none; }
+
+        .article-modal__panel {
+            position: relative;
+            background: #f5f5f0;
+            color: #111;
+            width: 720px;
+            max-width: 100%;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 40px 120px rgba(0,0,0,0.7);
+            animation: scaleIn .35s var(--ease) both;
+        }
+
+        .article-modal__close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0,0,0,0.06);
+            color: #333;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 2;
+            transition: background .2s ease;
+        }
+        .article-modal__close:hover { background: rgba(0,0,0,0.12); }
+
+        .article-modal__img {
+            width: 100%;
+            height: 320px;
+            background-size: cover;
+            background-position: center;
+            background-color: #ddd;
+        }
+
+        .article-modal__body {
+            padding: 28px 36px 40px;
+        }
+        .article-modal__title {
+            margin: 0 0 12px;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: .3px;
+            color: #111;
+        }
+        .article-modal__meta {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 22px;
+            letter-spacing: .5px;
+        }
+        .article-modal__content {
+            font-size: 16px;
+            line-height: 1.75;
+            color: #222;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+<div class="menu">
+    <img src="/images/logotipe.png" alt="ZEEKR">
+    <nav class="razdelu">
+        <a href="/index.html">Главная</a>
+
+        <a href="/dealers.html">Дилеры</a>
+        <a href="/cars.html">Модели</a>
+        <a href="/test_drives.html">Тест-драйвы</a>
+        <a href="/cards.html">Корзины</a>
+        <a href="/profile.html">Профиль</a>
+    </nav>
+</div>
+
+<div class="page">
+
+    <div class="news-hero">
+        <h1>Новости<span> Zeekr</span></h1>
+        <div class="news-hero-actions">
+            <button id="addBtn" class="primary">+ Добавить новость</button>
+        </div>
+    </div>
+
+    <div class="news-grid" id="newsGrid">
+    </div>
+
+    <div id="pagination" class="pagination"></div>
+</div>
+
+<div class="article-modal hidden" id="articleModal">
+    <div class="article-modal__panel">
+        <button class="article-modal__close" id="articleClose" aria-label="Закрыть">✕</button>
+        <div class="article-modal__img" id="articleImg"></div>
+        <div class="article-modal__body">
+            <h2 class="article-modal__title" id="articleTitle"></h2>
+            <div class="article-modal__meta" id="articleMeta"></div>
+            <div class="article-modal__content" id="articleContent"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Модалка формы -->
+<div id="modal" class="modal hidden">
+    <div class="modal-content">
+        <h2 id="modalTitle">Добавить новость</h2>
+        <form id="newsForm">
+            <input type="hidden" id="itemId">
+
+            <label>Заголовок
+                <input type="text" id="itemTitle" required minlength="3" maxlength="150">
+            </label>
+            <label>Содержание
+                <textarea id="itemContent" required minlength="10" maxlength="2000"></textarea>
+            </label>
+            <label>Ссылка на изображение
+                <input type="text" id="itemImage" required minlength="3" maxlength="255"
+                       placeholder="img1.jpg">
+            </label>
+            <label>Дата публикации
+                <input type="date" id="itemPublishDate" required>
+            </label>
+            <label>Автор
+                <select id="itemAuthor" required>
+                    <option value="">— выберите автора —</option>
+                </select>
+            </label>
+
+            <div class="modal-actions">
+                <button type="button" id="cancelBtn" class="ghost">Отмена</button>
+                <button type="submit" class="primary">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="/js/api.js"></script>
+<script src="/js/news.js"></script>
+</body>
+</html>
