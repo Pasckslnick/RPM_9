@@ -1,6 +1,3 @@
-/* ============================================================
-   ZEEKR · Card detail page (items inside card)
-   ============================================================ */
 
 const params = new URLSearchParams(window.location.search);
 const cardId = Number(params.get('id'));
@@ -18,6 +15,7 @@ const itemsBody   = document.getElementById('itemsBody');
 const totalPriceEl= document.getElementById('totalPrice');
 const toastEl     = document.getElementById('toast');
 const addItemBtn  = document.getElementById('addItemBtn');
+const orderBtn  = document.getElementById('orderBtn');
 
 const itemModal      = document.getElementById('itemModal');
 const itemModalTitle = document.getElementById('itemModalTitle');
@@ -28,7 +26,6 @@ const itemCompEl     = document.getElementById('itemComplecttion');
 const itemQuantityEl = document.getElementById('itemQuantity');
 const itemPriceEl    = document.getElementById('itemPrice');
 
-// ---- Logout ----
 const logoutBtn = document.getElementById('logoutBtn');
 if (logoutBtn) {
     logoutBtn.onclick = () => {
@@ -37,7 +34,6 @@ if (logoutBtn) {
     };
 }
 
-// ---- Права ----
 async function loadPermissions() {
     try {
         const me = await AuthMe.get();
@@ -47,7 +43,6 @@ async function loadPermissions() {
     } catch (e) { permissions.canEdit = false; }
 }
 
-// ---- Загрузка ----
 async function loadCard() {
     if (!cardId) {
         titleEl.textContent = 'Корзина не найдена';
@@ -56,15 +51,12 @@ async function loadCard() {
     try {
         await loadPermissions();
 
-        // 1. Корзина
         const card = await CardsApi.getById(cardId);
         state.card = card;
 
-        // 2. Комплектации — для селекта
         const comps = await CarComplectApi.getAll();
         state.complecttions = Array.isArray(comps) ? comps : [];
 
-        // 3. Позиции этой корзины
         const items = await apiFetch(`/api/card-details/by-card/${cardId}`, { method: 'GET' });
         state.items = Array.isArray(items) ? items : [];
 
@@ -85,6 +77,7 @@ function renderHeader() {
     if (addItemBtn) {
         addItemBtn.style.display = (permissions.canEdit || permissions.isAdmin) ? '' : 'none';
     }
+
 }
 
 function renderItems() {
@@ -111,12 +104,10 @@ function renderItems() {
         `;
     }).join('') || `<tr><td colspan="7" style="text-align:center;color:#7f7f7f;padding:24px">Позиций нет</td></tr>`;
 
-    // Итог
     const total = state.items.reduce((s, it) => s + (it.price ?? 0) * (it.quantity ?? 0), 0);
     if (totalPriceEl) totalPriceEl.textContent = formatPrice(total);
 }
 
-// ---- Обработчик таблицы ----
 if (itemsBody) {
     itemsBody.addEventListener('click', async (e) => {
         const btn = e.target.closest('button[data-action]');
@@ -129,7 +120,6 @@ if (itemsBody) {
     });
 }
 
-// ---- Модалка ----
 function fillComplecttionSelect() {
     if (!itemCompEl) return;
     itemCompEl.innerHTML = '<option value="">— выберите комплектацию —</option>' +
@@ -152,6 +142,33 @@ if (addItemBtn) {
         itemQuantityEl.value = 1;
         itemPriceEl.value = '';
         itemModal.classList.remove('hidden');
+    };
+}
+
+if (orderBtn) {
+    orderBtn.onclick = async () => {
+        if (!state.items.length) {
+            showToast('Корзина пуста', 'error');
+            return;
+        }
+
+        const c = state.card;
+
+        const payload = {
+            user:      { id: c.user.id },
+            createdAt: c.createdAt,
+            status:    'Оформлена'
+        };
+
+        try {
+            await CardsApi.update(cardId, payload);
+            showToast('Корзина оформлена', 'success');
+
+            await loadCard();
+        } catch (e) {
+            showToast('Ошибка: ' + e.message, 'error');
+            console.error(e);
+        }
     };
 }
 
@@ -217,7 +234,6 @@ if (itemForm) {
     });
 }
 
-// ---- Удаление ----
 async function removeItem(id) {
     if (!confirm('Удалить позицию #' + id + '?')) return;
     try {
@@ -227,7 +243,6 @@ async function removeItem(id) {
     } catch (e) { showToast('Ошибка удаления: ' + e.message, 'error'); }
 }
 
-// ---- Утилиты ----
 function formatPrice(v) {
     if (v == null) return '0';
     return Number(v).toLocaleString('ru-RU');

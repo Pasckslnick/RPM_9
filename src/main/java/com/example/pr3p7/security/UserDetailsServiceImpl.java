@@ -28,7 +28,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         UserModel user = userRepository.findByUsernameIgnoreCase(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        // Получаем название роли по roleId
         String roleName = "USER";
         if (user.getRoleId() != null) {
             roleName = roleRepository.findById(user.getRoleId())

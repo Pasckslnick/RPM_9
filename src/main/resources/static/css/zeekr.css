@@ -104,7 +104,7 @@ body::after {
 
 .menu img {
     height: 34px;
-    filter: brightness(0) invert(1);
+
     opacity: .92;
     transition: opacity var(--dur) var(--ease);
 }

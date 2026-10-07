@@ -27,6 +27,8 @@
     <div class="toolbar">
         <div class="group">
             <button id="addItemBtn" class="primary" style="display:none;">+ Добавить комплектацию</button>
+            <button id="orderBtn" class="primary" >Оформать заказ</button>
+
         </div>
         <div style="margin-left:auto;font-size:20px;color:#fff;">
             Итого: <span id="totalPrice">0</span> ₽
@@ -49,7 +51,6 @@
     </table>
 </div>
 
-<!-- Модалка добавления/редактирования позиции -->
 <div id="itemModal" class="modal hidden">
     <div class="modal-content">
         <h2 id="itemModalTitle">Добавить комплектацию</h2>
@@ -70,6 +71,7 @@
             <label>Цена, ₽
                 <input type="number" id="itemPrice" step="0.01" min="0.01" required>
             </label>
+
 
             <div class="modal-actions">
                 <button type="button" id="itemCancelBtn" class="ghost">Отмена</button>

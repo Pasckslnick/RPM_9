@@ -1,6 +1,3 @@
-/* ============================================================
-   ZEEKR · Cards list page
-   ============================================================ */
 
 const PAGE_SIZE = 10;
 
@@ -12,7 +9,6 @@ const paginationEl = document.getElementById('pagination');
 const searchInput  = document.getElementById('searchInput');
 const toastEl      = document.getElementById('toast');
 
-// ---- Logout ----
 const logoutBtn = document.getElementById('logoutBtn');
 if (logoutBtn) {
     logoutBtn.onclick = () => {
@@ -21,7 +17,6 @@ if (logoutBtn) {
     };
 }
 
-// ---- Права ----
 async function loadPermissions() {
     try {
         const me = await AuthMe.get();
@@ -30,7 +25,6 @@ async function loadPermissions() {
     } catch (e) { permissions.canEdit = false; }
 }
 
-// ---- Загрузка ----
 async function load() {
     try {
         await loadPermissions();
@@ -57,7 +51,6 @@ function applyFilter() {
     render();
 }
 
-// ---- Отрисовка ----
 function render() {
     if (!tbody) return;
     const start = state.page * PAGE_SIZE;

@@ -1,14 +1,8 @@
-/* ============================================================
-   ZEEKR · Password field
-   - Видно только последний введённый символ
-   - Кнопка «показать пароль» (глаз)
-   - Лицо над полем: закрывает глаза руками при вводе
-   ============================================================ */
+
 
 (function () {
     'use strict';
 
-    // ---------- SVG иконки ----------
     const ICON_EYE_OPEN = `
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
              stroke-linecap="round" stroke-linejoin="round">
@@ -25,42 +19,23 @@
             <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>
         </svg>`;
 
-    // Лицо над полем
-    const FACE_OPEN = `
-        <svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg">
-            <circle class="head" cx="60" cy="50" r="30"/>
-            <circle class="eye eye-left"  cx="48" cy="46" r="3"/>
-            <circle class="eye eye-right" cx="72" cy="46" r="3"/>
-            <path class="mouth" d="M50 60 Q60 68 70 60"/>
-            <g class="hands">
-                <path class="hand hand-left"  d="M30 84 Q22 70 34 60 Q40 66 34 78 Z"/>
-                <path class="hand hand-right" d="M90 84 Q98 70 86 60 Q80 66 86 78 Z"/>
-            </g>
-        </svg>`;
-
-    // Тот же SVG — состояние «закрыто» управляется CSS-классом is-hidden
-    const FACE_CLOSED = FACE_OPEN;
-
-    // ---------- Инициализация поля ----------
     function initPasswordField(wrapper) {
         const input  = wrapper.querySelector('input[data-password], input[type="password"], input[type="text"]');
         const eyeBtn = wrapper.querySelector('.pw-toggle');
         const faceEl = wrapper.querySelector('.pw-face');
         if (!input) return;
 
-        // Помечаем поле и переключаем на text + CSS-маску
         input.setAttribute('data-password', 'true');
         input.setAttribute('autocomplete', input.getAttribute('autocomplete') || 'off');
         input.setAttribute('spellcheck', 'false');
         input.setAttribute('autocapitalize', 'off');
         input.type = 'text';
-        input.classList.add('pw-masked');   // CSS-маска через -webkit-text-security
+        input.classList.add('pw-masked');
 
         let realValue = input.value || '';
         let revealed  = false;
         let composing = false;
 
-        // ---------- Маска ----------
         function renderMasked() {
             if (revealed) {
                 input.value = realValue;
@@ -75,7 +50,6 @@
             input.value = dots + last;
         }
 
-        // ---------- Лицо ----------
         function setFaceHidden(hidden) {
             if (!faceEl) return;
             faceEl.classList.toggle('is-hidden', !!hidden);
@@ -86,7 +60,6 @@
             setFaceHidden(realValue.length > 0);
         }
 
-        // ---------- Ввод ----------
         input.addEventListener('compositionstart', () => { composing = true; });
         input.addEventListener('compositionend', () => {
             composing = false;
@@ -113,13 +86,11 @@
             }
         });
 
-        // Каретка в конец
         input.addEventListener('click', () => {
             const len = input.value.length;
             try { input.setSelectionRange(len, len); } catch (_) {}
         });
 
-        // ---------- Глаз ----------
         if (eyeBtn) {
             eyeBtn.innerHTML = ICON_EYE_CLOSED;
 
@@ -150,24 +121,20 @@
             eyeBtn.addEventListener('click', (e) => e.preventDefault());
         }
 
-        // ---------- Фокус / блюр ----------
         input.addEventListener('focus', updateFace);
         input.addEventListener('blur', () => {
             if (!revealed) renderMasked();
             setFaceHidden(false);
         });
 
-        // ---------- Перед отправкой формы ----------
         const form = input.form;
         if (form) form.addEventListener('submit', () => { input.value = realValue; });
 
-        // ---------- Публичное поле ----------
         Object.defineProperty(input, 'realValue', {
             get() { return realValue; },
             set(v) { realValue = String(v ?? ''); renderMasked(); updateFace(); }
         });
 
-        // Инициализация
         setFaceHidden(false);
         if (realValue) renderMasked();
         updateFace();
