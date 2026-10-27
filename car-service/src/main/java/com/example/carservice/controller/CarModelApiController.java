@@ -1,0 +1,114 @@
+
+package com.example.carservice.controller;
+
+import com.example.carservice.model.CarModel;
+import com.example.carservice.service.CarModelService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/car-models")
+@Tag(name = "Модели автомобилей", description = "CRUD операции с моделями автомобилей")
+@SecurityRequirement(name = "bearerAuth")
+public class CarModelApiController {
+
+    private final CarModelService service;
+
+    public CarModelApiController(CarModelService service) {
+        this.service = service;
+    }
+
+    @GetMapping
+    @Operation(summary = "Получить все модели",
+            description = "Возвращает список всех моделей автомобилей")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Найдено"),
+            @ApiResponse(responseCode = "404", description = "Модели не найдены"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error"),
+            @ApiResponse(responseCode = "503", description = "Service Unavailable"),
+            @ApiResponse(responseCode = "504", description = "Gateway Timeout")
+    })
+    public List<CarModel> getAll() {
+        return service.getAll();
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Получить модель по ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Найдено"),
+            @ApiResponse(responseCode = "404", description = "Модель не найдена"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error"),
+            @ApiResponse(responseCode = "503", description = "Service Unavailable"),
+            @ApiResponse(responseCode = "504", description = "Gateway Timeout")
+    })
+    public CarModel getById(
+            @Parameter(description = "Идентификатор модели")
+            @PathVariable int id) {
+        return service.getById(id);
+    }
+
+    @PostMapping
+    @Operation(summary = "Создать модель",
+            description = "Создаёт новую модель автомобиля и возвращает её")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Создано"),
+            @ApiResponse(responseCode = "400", description = "Некорректные данные"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error"),
+            @ApiResponse(responseCode = "503", description = "Service Unavailable"),
+            @ApiResponse(responseCode = "504", description = "Gateway Timeout")
+    })
+    public CarModel create(@Valid @RequestBody CarModel item) {
+        return service.save(item);
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Обновить модель",
+            description = "Обновляет существующую модель автомобиля")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Обновлено"),
+            @ApiResponse(responseCode = "400", description = "Некорректные данные"),
+            @ApiResponse(responseCode = "404", description = "Модель не найдена"),
+            @ApiResponse(responseCode = "401", description = "Не авторизирован"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error"),
+            @ApiResponse(responseCode = "503", description = "Service Unavailable"),
+            @ApiResponse(responseCode = "504", description = "Gateway Timeout")
+    })
+    public CarModel update(
+            @PathVariable Integer id,
+            @Valid @RequestBody CarModel item) {
+        item.setId(id);
+        return service.save(item);
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Удалить модель",
+            description = "Удаляет модель автомобиля по её идентификатору")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Удалено"),
+            @ApiResponse(responseCode = "404", description = "Модель не найдена"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error"),
+            @ApiResponse(responseCode = "503", description = "Service Unavailable"),
+            @ApiResponse(responseCode = "504", description = "Gateway Timeout")
+    })
+    public String delete(@PathVariable Integer id) {
+        service.delete(id);
+        return "Модель удалена";
+    }
+}
