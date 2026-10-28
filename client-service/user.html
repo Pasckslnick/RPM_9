@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZEEKR · Пользователи</title>
+    <link rel="stylesheet" href="/css/zeekr.css">
+</head>
+<body>
+
+<div class="menu">
+    <img src="/images/logotipe.png" alt="ZEEKR">
+    <nav class="razdelu">
+        <a href="/profile.html">Профиль</a>
+    </nav>
+</div>
+
+<div class="page">
+    <h1>Польз<span>ователи</span></h1>
+    <p class="subtitle">User accounts</p>
+
+    <div class="toolbar">
+        <div class="group">
+            <input type="text" id="searchInput" placeholder="Поиск по логину..." style="width:280px; margin:0">
+            <button id="searchBtn" class="ghost">Найти</button>
+            <button id="clearSearchBtn" class="ghost">Сбросить</button>
+        </div>
+        <!-- + Добавить убран: админ не создаёт пользователей -->
+    </div>
+
+    <table id="usersTable">
+        <thead>
+        <tr>
+            <th style="width:60px;">ID</th>
+            <th>Логин</th>
+            <th>Email</th>
+            <th>Телефон</th>
+            <th>Роль</th>
+            <th>Должность</th>
+            <th style="width:300px;">Действия</th>
+        </tr>
+        </thead>
+        <tbody id="usersBody"></tbody>
+    </table>
+
+    <div id="pagination" class="pagination"></div>
+</div>
+
+<!-- Модальное окно формы (только редактирование) -->
+<div id="modal" class="modal hidden">
+    <div class="modal-content">
+        <h2 id="modalTitle">Изменить пользователя</h2>
+        <form id="userForm">
+            <input type="hidden" id="itemId">
+
+            <label>Логин
+                <input type="text" id="itemUsername" required minlength="3" maxlength="50">
+            </label>
+
+            <label>Email
+                <input type="email" id="itemEmail" required maxlength="120">
+            </label>
+
+            <label>Телефон
+                <input type="text" id="itemPhone" required pattern="^\+?[0-9]{10,15}$"
+                       placeholder="89991234567">
+            </label>
+
+            <label>Роль
+                <select id="itemRole" required>
+                    <option value="">— выберите роль —</option>
+                </select>
+            </label>
+
+            <label>Должность
+                <select id="itemPosition" required>
+                    <option value="">— выберите должность —</option>
+                </select>
+            </label>
+
+            <div class="modal-actions">
+                <button type="button" id="cancelBtn" class="ghost">Отмена</button>
+                <button type="submit" class="primary">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="viewModal" class="modal hidden">
+    <div class="modal-content">
+        <h2>Просмотр пользователя</h2>
+        <dl id="viewContent"></dl>
+        <div class="modal-actions">
+            <button type="button" id="closeViewBtn" class="ghost">Закрыть</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="/js/api.js"></script>
+<script src="/js/user.js"></script>
+</body>
+</html>

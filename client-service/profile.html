@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZEEKR · Профиль</title>
+    <link rel="stylesheet" href="/css/zeekr.css">
+    <style>
+        .profile-hero {
+            text-align: center;
+            margin-bottom: 48px;
+            animation: fadeUp .8s var(--ease) both;
+        }
+        .profile-hero h1 {
+            letter-spacing: 10px;
+            font-size: clamp(28px, 4vw, 44px);
+        }
+        .profile-hero .subtitle { margin-bottom: 0; }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+            margin-bottom: 40px;
+        }
+        @media (max-width: 900px) {
+            .profile-grid { grid-template-columns: 1fr; }
+        }
+
+        .profile-card {
+            background: linear-gradient(180deg, #161616 0%, #101010 100%);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 32px;
+            animation: fadeUp .8s var(--ease) both;
+        }
+
+        .profile-card h2 {
+            margin: 0 0 20px;
+            font-weight: 300;
+            font-size: 18px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: #fff;
+        }
+
+        .profile-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--line);
+        }
+        .profile-row:last-child { border-bottom: none; }
+
+        .profile-row .label {
+            font-size: 11px;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--dim);
+        }
+        .profile-row .value {
+            font-size: 15px;
+            color: var(--text);
+            letter-spacing: .3px;
+            text-align: right;
+            word-break: break-word;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border: 1px solid var(--line-strong);
+            color: var(--muted);
+        }
+        .role-badge.admin   { border-color: rgba(120, 220, 255, .6); color: #9be1ff; }
+        .role-badge.manager { border-color: rgba(255, 200, 120, .5); color: #ffd79b; }
+        .role-badge.user    { border-color: var(--line-strong); color: var(--muted); }
+
+        .panel-links {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        @media (max-width: 700px) {
+            .panel-links { grid-template-columns: 1fr; }
+        }
+
+        .panel-link {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-sm);
+            background: #0f0f0f;
+            text-decoration: none;
+            color: var(--text);
+            transition: border-color .25s var(--ease), background .25s var(--ease),
+            transform .25s var(--ease);
+        }
+        .panel-link:hover {
+            border-color: var(--line-strong);
+            background: #141414;
+            transform: translateY(-2px);
+        }
+        .panel-link__title {
+            font-size: 13px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .panel-link__arrow {
+            color: var(--dim);
+            transition: color .25s var(--ease), transform .25s var(--ease);
+        }
+        .panel-link:hover .panel-link__arrow {
+            color: #fff;
+            transform: translateX(4px);
+        }
+        .panel-link.locked {
+            opacity: .45;
+            pointer-events: none;
+        }
+        .panel-link.locked .panel-link__arrow::after {
+            content: " · locked";
+            color: #ff5a5a;
+            font-size: 10px;
+            letter-spacing: 1.5px;
+        }
+
+        .logout-btn-wide {
+            display: block;
+            width: 100%;
+            margin-top: 32px;
+            padding: 18px 24px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="menu">
+    <img src="/images/logotipe.png" alt="ZEEKR">
+    <nav class="razdelu">
+        <a href="/dealers.html">Дилеры</a>
+        <a href="/news.html">Новости</a>
+        <a href="/cars.html">Модели</a>
+        <a href="/cards.html">Корзины</a>
+
+        <a href="/test_drives.html">Тест-драйвы</a>
+        <a href="/index.html">Главная</a>
+
+    </nav>
+</div>
+
+<div class="page">
+
+    <div class="profile-hero">
+        <h1>Профиль<span> ZEEKR</span></h1>
+        <p class="subtitle">Your account</p>
+    </div>
+
+    <div class="profile-grid">
+        <div class="profile-card">
+            <h2>Личные данные</h2>
+            <div class="profile-row">
+                <span class="label">ID</span>
+                <span class="value" id="pId">—</span>
+            </div>
+            <div class="profile-row">
+                <span class="label">Логин</span>
+                <span class="value" id="pUsername">—</span>
+            </div>
+            <div class="profile-row">
+                <span class="label">Email</span>
+                <span class="value" id="pEmail">—</span>
+            </div>
+            <div class="profile-row">
+                <span class="label">Телефон</span>
+                <span class="value" id="pPhone">—</span>
+            </div>
+            <div class="profile-row">
+                <span class="label">Должность</span>
+                <span class="value" id="pPosition">—</span>
+            </div>
+            <div class="profile-row">
+                <span class="label">Роль</span>
+                <span class="value"><span id="pRole" class="role-badge user">—</span></span>
+            </div>
+        </div>
+
+        <div class="profile-card" id="panelCard">
+            <h2 id="panelTitle">Панель</h2>
+            <div class="panel-links" id="panelLinks"></div>
+        </div>
+    </div>
+
+    <button id="logoutBtn" class="primary logout-btn-wide">Выйти из аккаунта</button>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="/js/api.js"></script>
+<script src="/js/profile.js"></script>
+</body>
+</html>

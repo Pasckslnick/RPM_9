@@ -1,147 +1,82 @@
-# RPM_9 — Spring Cloud микросервисное приложение
+# RPM_9
 
-Учебный проект по изучению Spring Cloud. Приложение разделено на
-микросервисы и использует централизованную конфигурацию, обнаружение
-сервисов, API Gateway, JWT-аутентификацию, Circuit Breaker, Actuator,
-логирование и Swagger/OpenAPI.
+Учебное микросервисное приложение на Spring Cloud для работы с
+пользователями, автомобилями и тест-драйвами.
 
-## 1. Архитектура
+## Архитектура
 
 ```text
                          ┌─────────────────┐
                          │   API Gateway   │ :8082
                          └────────┬────────┘
-                                  │ Eureka LoadBalancer
+                                  │
        ┌──────────────────────────┼──────────────────────────┐
        │                          │                          │
 ┌──────▼──────┐           ┌───────▼──────┐           ┌───────▼────────┐
 │ user-service│ :8084     │ car-service  │ :8083     │ test-drives    │ :8087
-└──────┬──────┘           └───────┬──────┘           │ -service       │
-       │                          │                  └───────┬────────┘
+│             │           │              │           │ -service       │
+└──────┬──────┘           └───────┬──────┘           └───────┬────────┘
        └──────────────────────────┴──────────────────────────┘
                                   │
                          ┌────────▼────────┐
                          │   PostgreSQL    │
-                         │  общая база     │
                          └─────────────────┘
 
  Eureka Server :8761       Config Server :8888
 ```
 
-Сервисы используют Java 17, Spring Boot 3.4.5 и Spring Cloud 2024.0.2.
-Каждый сервис является отдельным Maven-проектом.
+Проект использует Java 17, Spring Boot 3.4.5 и Spring Cloud 2024.0.2.
 
-## 2. Структура проекта
+## Структура
 
 ```text
 practos_9/
-├── api-gateway/                 # Единая точка входа, маршрутизация и fallback
-├── car-service/                 # Автомобили и карточки автомобилей
-├── config-server/               # Spring Cloud Config Server
-│   └── config-repo/             # Централизованные properties
-├── eureka-server/               # Service Discovery
+├── api-gateway/                 # Единая точка входа и маршрутизация
+├── car-service/                 # Модели автомобилей и карточки
+├── config-server/               # Централизованная конфигурация
+│   └── config-repo/
+├── eureka-server/               # Регистрация и обнаружение сервисов
 ├── test-drives-service/         # Записи на тест-драйвы
-├── user-service/                # Пользователи, роли и JWT
-├── OLD PROJECT/                 # Исходный монолит, не запускается в новой схеме
+├── user-service/                # Пользователи, роли и авторизация
+├── client-service/              # Веб-интерфейс
 └── README.md
 ```
 
-В текущей версии реализованы три доменных микросервиса:
-`user-service`, `car-service` и `test-drives-service`. Этого достаточно для
-обязательного требования задания о минимум трёх микросервисах.
+## Реализовано
 
-## 3. Статус требований задания
+- три доменных микросервиса: `user-service`, `car-service`,
+  `test-drives-service`;
+- централизованная конфигурация через Config Server;
+- регистрация и обнаружение сервисов через Eureka;
+- маршрутизация запросов через API Gateway;
+- резервные ответы Gateway при недоступности доменного сервиса;
+- мониторинг через Spring Boot Actuator;
+- базовое HTTP-логирование и ротация файлов логов;
+- Swagger/OpenAPI для доменных сервисов;
+- разграничение операций по ролям;
+- CRUD для пользователей, ролей, автомобилей и тест-драйвов;
+- статический клиент с авторизацией, профилем, каталогом автомобилей и
+  страницей тест-драйвов;
+- клиент обращается к backend через API Gateway на порту `8082`.
 
-| Требование | Статус | Реализация |
-|---|---|---|
-| Минимум 3 микросервиса | Выполнено | user, car, test-drives |
-| Spring Cloud Config | Выполнено | config-server и config-repo |
-| Eureka Discovery | Выполнено | eureka-server и Eureka Client |
-| API Gateway | Выполнено | маршруты к трём сервисам |
-| Circuit Breaker | Выполнено | Resilience4j в Gateway |
-| Actuator | Выполнено | health/info, Gateway routes |
-| Базовое логирование | Выполнено | консоль, rolling-файлы, архивы |
-| Swagger/OpenAPI | Выполнено | у всех доменных сервисов |
-| JWT и роли | Выполнено | user-service выдаёт JWT |
-| Защищённый CRUD | Выполнено | пользователи, автомобили, тест-драйвы |
-
-`dealer-service` и `news-service` в текущую реализацию не входят: они не
-требуются для минимального условия о трёх микросервисах.
-
-## 4. Сервисы
-
-### User Service — порт 8084
-
-Swagger: `http://localhost:8084/swagger-ui/index.html`
-OpenAPI: `http://localhost:8084/v3/api-docs`
-
-Основные маршруты:
-
-| Метод | Путь | Назначение |
-|---|---|---|
-| POST | `/api/auth/register` | Регистрация |
-| POST | `/api/auth/login` | Вход и получение JWT |
-| GET | `/api/auth/me` | Текущий пользователь |
-| CRUD | `/api/users`, `/api/users/{id}` | Пользователи |
-| CRUD | `/api/roles`, `/api/roles/{id}` | Роли |
-
-### Car Service — порт 8083
-
-Swagger: `http://localhost:8083/swagger-ui/index.html`
-OpenAPI: `http://localhost:8083/v3/api-docs`
-
-Основные ресурсы:
-
-- `/api/car-models`;
-- `/api/car-complecttions`;
-- `/api/cards`;
-- `/api/card-details`.
-
-### Test Drives Service — порт 8087
-
-Файл запуска: `test-drives-service/src/main/java/com/example/testdrivesservice/TestDrivesServiceApplication.java`
-
-Swagger: `http://localhost:8087/swagger-ui/index.html`
-OpenAPI: `http://localhost:8087/v3/api-docs`
-
-Сервис работает с таблицей `test_drives` общей PostgreSQL-базы.
-
-| Метод | Путь | Доступ |
-|---|---|---|
-| GET | `/api/test-drives` | свои записи; ADMIN/MANAGER — все |
-| GET | `/api/test-drives/my` | записи текущего пользователя |
-| GET | `/api/test-drives/{id}` | своя запись; ADMIN/MANAGER — любая |
-| GET | `/api/test-drives/search?query=...` | поиск с учётом прав |
-| POST | `/api/test-drives` | любой авторизованный пользователь |
-| PUT | `/api/test-drives/{id}` | ADMIN/MANAGER |
-| DELETE | `/api/test-drives/{id}` | ADMIN/MANAGER |
-
-При создании обычным пользователем `userId` берётся из JWT, поэтому его
-нельзя подменить в JSON-запросе. CUSTOMER не может изменить или удалить
-тест-драйв и не может получить чужую запись по идентификатору.
-
-## 5. Spring Cloud компоненты
+## Сервисы и порты
 
 ### Eureka Server
 
-- Адрес: `http://localhost:8761`;
-- порт: `8761`;
-- отображает зарегистрированные `USER-SERVICE`, `CAR-SERVICE`,
-  `TEST-DRIVES-SERVICE` и `API-GATEWAY`.
+Адрес: `http://localhost:8761`
+
+После запуска в панели должны отображаться:
+
+- `API-GATEWAY`;
+- `USER-SERVICE`;
+- `CAR-SERVICE`;
+- `TEST-DRIVES-SERVICE`.
 
 ### Config Server
 
-- Адрес: `http://localhost:8888`;
-- порт: `8888`;
-- источник настроек: `config-server/config-repo`.
+Адрес: `http://localhost:8888`
 
-Конфигурации:
-
-- `application.properties`;
-- `api-gateway.properties`;
-- `user-service.properties`;
-- `car-service.properties`;
-- `test-drives-service.properties`.
+Конфигурации находятся в `config-server/config-repo`.
 
 Проверка:
 
@@ -157,11 +92,11 @@ http://localhost:8888/test-drives-service/default
 
 | Префикс | Сервис |
 |---|---|
-| `/user-service/**` | USER-SERVICE |
-| `/car-service/**` | CAR-SERVICE |
-| `/test-drive-service/**` | TEST-DRIVES-SERVICE |
+| `/user-service/**` | `USER-SERVICE` |
+| `/car-service/**` | `CAR-SERVICE` |
+| `/test-drive-service/**` | `TEST-DRIVES-SERVICE` |
 
-Gateway удаляет первый сегмент пути через `StripPrefix=1`. Например:
+Пример маршрутизации:
 
 ```text
 /test-drive-service/api/test-drives
@@ -169,60 +104,95 @@ Gateway удаляет первый сегмент пути через `StripPre
 /api/test-drives в TEST-DRIVES-SERVICE
 ```
 
-Fallback при недоступности тест-драйвов:
-
-```text
-GET http://localhost:8082/fallback/test-drive
-```
-
-Actuator Gateway:
+Проверка маршрутов:
 
 ```text
 http://localhost:8082/actuator/gateway/routes
 ```
 
-## 6. Безопасность и секреты
+### User Service — порт 8084
 
-- Все `/api/**` требуют JWT.
-- Swagger и `/actuator/health` доступны без токена.
-- Используется схема `Authorization: Bearer <JWT>`.
-- Роли нормализуются в `ROLE_ADMIN`, `ROLE_MANAGER`, `ROLE_CUSTOMER`.
-- JWT-секрет передаётся через `JWT_SECRET`.
-- Данные PostgreSQL передаются через `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`.
-- JWT, пароли и полные Authorization-заголовки не записываются в логи.
+Swagger: `http://localhost:8084/swagger-ui/index.html`
 
-Пример настройки окружения в PowerShell:
+Основные маршруты:
+
+| Метод | Путь |
+|---|---|
+| POST | `/api/auth/register` |
+| POST | `/api/auth/login` |
+| GET | `/api/auth/me` |
+| CRUD | `/api/users`, `/api/users/{id}` |
+| CRUD | `/api/roles`, `/api/roles/{id}` |
+
+### Car Service — порт 8083
+
+Swagger: `http://localhost:8083/swagger-ui/index.html`
+
+Основные ресурсы:
+
+- `/api/car-models`;
+- `/api/car-complecttions`;
+- `/api/cards`;
+- `/api/card-details`.
+
+### Test Drives Service — порт 8087
+
+Swagger: `http://localhost:8087/swagger-ui/index.html`
+
+Основные маршруты:
+
+| Метод | Путь |
+|---|---|
+| GET | `/api/test-drives` |
+| GET | `/api/test-drives/my` |
+| GET | `/api/test-drives/{id}` |
+| GET | `/api/test-drives/search?query=...` |
+| POST | `/api/test-drives` |
+| PUT | `/api/test-drives/{id}` |
+| DELETE | `/api/test-drives/{id}` |
+
+Пользователь с ролью `CUSTOMER` работает только со своими записями.
+Пользователи с ролями `MANAGER` и `ADMIN` могут работать с общим списком
+в соответствии со своими правами.
+
+## Клиент
+
+Клиент находится в папке `client-service` и запускается как статический сайт.
+Все запросы к backend выполняются через `http://localhost:8082`.
+
+Запуск:
 
 ```powershell
-$env:JWT_SECRET = "<base64-secret>"
-$env:DB_URL = "jdbc:postgresql://127.0.0.1:5432/data"
-$env:DB_USERNAME = "postgres"
-$env:DB_PASSWORD = "<database-password>"
+cd "C:\Users\Артём\Desktop\MPT\3 КУРС\RPM_Chibuk\practos_9\client-service"
+py -m http.server 5500
 ```
 
-Секреты не должны добавляться в Git.
+Открыть:
 
-## 7. Логирование и мониторинг
+```text
+http://localhost:5500/index.html
+```
+
+Страница входа:
+
+```text
+http://localhost:5500/login.html
+```
+
+Перед запуском клиента должны быть доступны Eureka, Config Server,
+доменные сервисы и API Gateway.
+
+## Логирование и мониторинг
 
 Для сервисов настроены:
 
-- вывод в консоль;
-- rolling-файл лога;
+- вывод сообщений в консоль;
+- запись в rolling-файлы;
 - ежедневная ротация;
-- ограничение размера;
-- архивирование `.gz`;
-- ограниченный срок хранения;
+- архивирование логов;
 - HTTP-логирование метода, пути, статуса и времени выполнения.
 
-Логи создаются локально в каталогах сервисов, например:
-
-```text
-test-drives-service/logs/test-drives-service.log
-```
-
-Файлы `logs/`, `*.log` и `target/` исключены из Git.
-
-Проверка Actuator:
+Проверка состояния сервисов:
 
 ```text
 http://localhost:8084/actuator/health
@@ -230,109 +200,75 @@ http://localhost:8083/actuator/health
 http://localhost:8087/actuator/health
 ```
 
-## 8. Порядок запуска
+Логи создаются в каталогах соответствующих сервисов, например:
 
-Перед запуском установите Java 17, Maven или используйте Maven Wrapper,
-Docker и PostgreSQL.
+```text
+test-drives-service/logs/test-drives-service.log
+```
+
+## Порядок запуска
+
+Каждый компонент запускайте в отдельном окне PowerShell.
 
 ### 1. PostgreSQL
 
 ```powershell
-cd ".\OLD PROJECT"
+cd "C:\Users\Артём\Desktop\MPT\3 КУРС\RPM_Chibuk\practos_9\OLD PROJECT"
 docker compose up -d
-cd ..
 ```
 
 ### 2. Eureka Server
 
 ```powershell
-cd .\eureka-server
+cd "C:\Users\Артём\Desktop\MPT\3 КУРС\RPM_Chibuk\practos_9\eureka-server"
 .\mvnw.cmd spring-boot:run
 ```
 
 ### 3. Config Server
 
 ```powershell
-cd ..\config-server
+cd "C:\Users\Артём\Desktop\MPT\3 КУРС\RPM_Chibuk\practos_9\config-server"
 .\mvnw.cmd spring-boot:run
 ```
 
 ### 4. User Service
 
 ```powershell
-cd ..\user-service
+cd "C:\Users\Артём\Desktop\MPT\3 КУРС\RPM_Chibuk\practos_9\user-service"
 .\mvnw.cmd spring-boot:run
 ```
 
 ### 5. Car Service
 
 ```powershell
-cd ..\car-service
+cd "C:\Users\Артём\Desktop\MPT\3 КУРС\RPM_Chibuk\practos_9\car-service"
 .\mvnw.cmd spring-boot:run
 ```
 
 ### 6. Test Drives Service
 
 ```powershell
-cd ..\test-drives-service
+cd "C:\Users\Артём\Desktop\MPT\3 КУРС\RPM_Chibuk\practos_9\test-drives-service"
 .\mvnw.cmd spring-boot:run
 ```
 
 ### 7. API Gateway
 
 ```powershell
-cd ..\api-gateway
+cd "C:\Users\Артём\Desktop\MPT\3 КУРС\RPM_Chibuk\practos_9\api-gateway"
 .\mvnw.cmd spring-boot:run
 ```
 
-Config Server и Eureka должны быть запущены до клиентов. После запуска
-проверьте регистрации на `http://localhost:8761`.
+После запуска проверьте Eureka и затем запустите клиент из раздела выше.
 
-## 9. Проверка
+## Проверка
 
-Сборка тест-драйвов:
+Сборка и тесты сервиса тест-драйвов:
 
 ```powershell
-cd .\test-drives-service
-.\mvnw.cmd -DskipTests package
+cd ".\test-drives-service"
 .\mvnw.cmd test
 ```
 
-В текущей версии проверяются:
-
-- загрузка Spring-контекста;
-- создание записи CUSTOMER со своим `userId`;
-- запрет доступа к чужой записи;
-- запрет изменения и удаления для CUSTOMER;
-- изменение записи MANAGER;
-- удаление записи ADMIN.
-
-Проверка Gateway выполняется через:
-
-```text
-http://localhost:8082/user-service/api/auth/login
-http://localhost:8082/car-service/api/car-models
-http://localhost:8082/test-drive-service/api/test-drives
-```
-
-Эти URL нельзя проверять простым переходом по ссылке в браузере:
-`/api/auth/login` принимает только `POST`, а защищённые маршруты требуют
-заголовок `Authorization`. Для проверки через PowerShell используйте:
-
-Для Swagger откройте
-`http://localhost:8087/swagger-ui/index.html`, нажмите **Authorize** и
-передайте `Bearer <JWT-токен>`. Ответ `405 Method Not Allowed` на URL login
-означает, что был отправлен GET вместо POST. Ответ `401/403` на тест-драйвы
-без токена означает, что защищённый endpoint вызван без авторизации.
-
-Для проверки Circuit Breaker остановите соответствующий сервис и повторите
-запрос через Gateway: должен вернуться HTTP 503 с JSON fallback.
-
-## 10. Что осталось расширить
-
-Обязательная Spring Cloud-часть выполнена на трёх микросервисах. Для
-расширенной версии проекта можно добавить:
-
-- `dealer-service`;
-- `news-service`;
-- агрегацию Swagger через Gateway;
+Проверяются загрузка контекста, создание и просмотр записей, а также
+разграничение операций для `CUSTOMER`, `MANAGER` и `ADMIN`.

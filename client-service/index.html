@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZEEKR · Электрическая революция</title>
+    <link rel="stylesheet" href="/css/zeekr.css">
+    <style>
+        /* ================= HERO ================= */
+        .home-hero {
+            position: relative;
+            min-height: 78vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 80px 60px 60px;
+            background:
+                    linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.85) 100%),
+                    url('/images/001.jpg') center/cover no-repeat;
+            color: #fff;
+            overflow: hidden;
+        }
+        .home-hero__eyebrow {
+            font-size: 11px; letter-spacing: 4px;
+            color: #c9c9c9; text-transform: uppercase; margin-bottom: 16px;
+        }
+        .home-hero h1 {
+            margin: 0 0 18px;
+            font-size: clamp(48px, 8vw, 96px);
+            font-weight: 700; letter-spacing: 2px; line-height: 1;
+            text-transform: uppercase;
+        }
+        .home-hero__sub {
+            max-width: 620px; color: #c9c9c9;
+            font-size: 15px; line-height: 1.6; margin-bottom: 28px;
+        }
+        .home-hero__buttons { display: flex; gap: 14px; flex-wrap: wrap; }
+
+        .btn-pill {
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 14px 28px; border-radius: 999px;
+            font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+            font-weight: 600; text-decoration: none; cursor: pointer;
+            border: 1px solid transparent;
+            transition: all .25s var(--ease);
+        }
+        .btn-pill--light { background: #fff; color: #0a0a0a; }
+        .btn-pill--light:hover { background: #eaeaea; transform: translateY(-2px); }
+        .btn-pill--ghost { background: transparent; color: #fff; border-color: rgba(255,255,255,0.35); }
+        .btn-pill--ghost:hover { border-color: #fff; }
+
+        /* ================= STATS ================= */
+        .home-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1px;
+            background: #111;
+            border-top: 1px solid #1c1c1c;
+            border-bottom: 1px solid #1c1c1c;
+        }
+        .home-stat {
+            background: #0a0a0a;
+            padding: 32px 24px;
+            text-align: left;
+        }
+        .home-stat__num {
+            font-size: 34px; font-weight: 700; color: #fff; letter-spacing: 1px;
+        }
+        .home-stat__label {
+            margin-top: 6px; font-size: 11px; letter-spacing: 2.5px;
+            text-transform: uppercase; color: var(--dim);
+        }
+
+        /* ================= GENERIC SECTION ================= */
+        .home-section {
+            padding: 90px 60px;
+            background: #0a0a0a;
+        }
+        .home-section--dark { background: #050505; }
+        .home-section--light { background: #f5f4f0; color: #111; }
+        .home-section h2 {
+            margin: 0 0 12px;
+            font-size: clamp(28px, 4vw, 44px);
+            letter-spacing: 1px; font-weight: 700; line-height: 1.15;
+        }
+        .home-section h2 .light { color: #8a8a8a; font-weight: 300; }
+        .home-section p.lead {
+            color: var(--muted); max-width: 620px;
+            font-size: 15px; line-height: 1.6; margin: 0 0 40px;
+        }
+        .home-section--light p.lead { color: #5a5a5a; }
+
+        .home-eyebrow {
+            font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+            color: #7a7a7a; margin-bottom: 14px;
+        }
+
+        /* ================= MODELS ================= */
+        .home-models {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .home-model {
+            position: relative;
+            background: #141414;
+            border-radius: 14px;
+            overflow: hidden;
+            text-decoration: none;
+            color: #fff;
+            transition: transform .35s var(--ease), box-shadow .35s var(--ease);
+            cursor: pointer;
+        }
+        .home-model:hover { transform: translateY(-4px); box-shadow: 0 24px 60px rgba(0,0,0,.5); }
+        .home-model__img {
+            height: 220px; background-size: cover; background-position: center;
+            background-color: #1c1c1c;
+        }
+        .home-model__body { padding: 22px 24px 26px; }
+        .home-model__name {
+            font-size: 22px; font-weight: 700; letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+        .home-model__sub { color: #b0b0b0; font-size: 13px; margin-bottom: 14px; }
+        .home-model__row {
+            display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
+        }
+        .home-chip {
+            padding: 5px 12px; border-radius: 999px; font-size: 11px;
+            border: 1px solid #2e2e2e; color: #cfcfcf; letter-spacing: 1px;
+        }
+        .home-model__more {
+            color: #ff5a5a; font-size: 12px; letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* ================= FEATURE (big image) ================= */
+        .home-feature {
+            position: relative;
+            min-height: 500px;
+            display: flex; align-items: flex-end;
+            padding: 60px;
+            color: #fff;
+            background-size: cover; background-position: center;
+            background-color: #111;
+            overflow: hidden;
+        }
+        .home-feature::after {
+            content: ""; position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.85) 100%);
+        }
+        .home-feature__inner {
+            position: relative; z-index: 2; max-width: 620px;
+        }
+        .home-feature__eyebrow {
+            font-size: 11px; letter-spacing: 4px; color: #c9c9c9;
+            text-transform: uppercase; margin-bottom: 14px;
+        }
+        .home-feature h2 {
+            font-size: clamp(30px, 4.5vw, 52px);
+            margin: 0 0 14px; letter-spacing: 1px; line-height: 1.1;
+        }
+        .home-feature p { color: #cfcfcf; font-size: 15px; line-height: 1.6; margin: 0; }
+
+        /* ================= CONFIGURATOR ================= */
+        .home-config {
+            display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) { .home-config { grid-template-columns: 1fr; } }
+        .home-config__left {
+            background: #141414; border-radius: 14px; padding: 32px;
+            border: 1px solid #1f1f1f;
+        }
+        .home-config__right {
+            background: #f5f4f0; color: #111; border-radius: 14px; padding: 32px;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .home-config__label {
+            font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+            color: #7a7a7a; margin-bottom: 12px;
+        }
+        .home-config__models { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+        .home-config__tab {
+            padding: 10px 18px; border-radius: 999px;
+            border: 1px solid #2e2e2e; color: #b0b0b0;
+            font-size: 12px; letter-spacing: 1.5px; cursor: pointer;
+            background: transparent;
+        }
+        .home-config__tab.active { background: #fff; color: #111; border-color: transparent; }
+
+        .home-config__colors { display: flex; gap: 12px; }
+        .home-config__color {
+            width: 36px; height: 36px; border-radius: 50%;
+            border: 2px solid transparent; cursor: pointer;
+        }
+        .home-config__color.active { border-color: #fff; }
+        .home-config__color-name { color: #b0b0b0; font-size: 12px; margin-top: 12px; }
+
+        .home-config__price { font-size: 40px; font-weight: 700; letter-spacing: 1px; }
+        .home-config__price small { display: block; font-size: 12px; color: #5a5a5a; font-weight: 400; letter-spacing: 2px; margin-top: 6px; }
+        .home-config__cta { margin-top: 24px; }
+
+        /* ================= NEWS ================= */
+        .home-news {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 24px;
+        }
+        @media (max-width: 900px) { .home-news { grid-template-columns: 1fr; } }
+        .home-news__main {
+            position: relative; min-height: 380px;
+            background-size: cover; background-position: center;
+            background-color: #141414; border-radius: 14px; overflow: hidden;
+            display: flex; align-items: flex-end; padding: 30px; color: #fff;
+            cursor: pointer;
+        }
+        .home-news__main::after {
+            content: ""; position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.85) 100%);
+        }
+        .home-news__main-inner { position: relative; z-index: 2; max-width: 480px; }
+        .home-news__main-inner h3 {
+            margin: 0 0 10px; font-size: 22px; font-weight: 700;
+        }
+        .home-news__main-inner p { color: #cfcfcf; font-size: 14px; margin: 0 0 14px; }
+        .home-news__main-inner .more {
+            color: #fff; font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+        }
+        .home-news__side { display: flex; flex-direction: column; gap: 14px; }
+        .home-news__item {
+            background: #141414; border-radius: 12px; padding: 20px 22px;
+            color: #fff; cursor: pointer;
+            transition: background .25s var(--ease);
+            flex: 1;
+        }
+        .home-news__item:hover { background: #1a1a1a; }
+        .home-news__item .date { color: #7a7a7a; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+        .home-news__item h4 { margin: 0 0 8px; font-size: 16px; line-height: 1.35; }
+        .home-news__item p { color: #a0a0a0; font-size: 13px; margin: 0; line-height: 1.5; }
+
+        /* ================= CONTACT ================= */
+        .home-contact {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+        @media (max-width: 900px) { .home-contact { grid-template-columns: 1fr; } }
+        .home-contact__form { display: flex; flex-direction: column; gap: 12px; }
+        .home-contact__form select,
+        .home-contact__form input {
+            background: #0f0f0f; color: #fff; border: 1px solid #232323;
+            border-radius: 10px; padding: 14px 16px; font: inherit; font-size: 14px;
+        }
+        .home-contact__form select:focus,
+        .home-contact__form input:focus {
+            outline: none; border-color: #3a3a3a;
+        }
+        .home-contact__info {
+            background: #141414; border-radius: 14px; padding: 28px; color: #fff;
+        }
+        .home-contact__info h4 { margin: 0 0 14px; font-size: 16px; }
+        .home-contact__info a { color: #b0b0b0; text-decoration: none; display: block; margin-bottom: 6px; font-size: 14px; }
+        .home-contact__info a:hover { color: #fff; }
+
+        /* ================= FOOTER ================= */
+        .home-footer {
+            background: #050505; padding: 60px 60px 30px;
+            border-top: 1px solid #141414;
+        }
+        .home-footer__grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 30px; margin-bottom: 40px;
+        }
+        .home-footer__col h5 {
+            font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+            color: #7a7a7a; margin: 0 0 16px; font-weight: 500;
+        }
+        .home-footer__col a {
+            display: block; color: #cfcfcf; text-decoration: none;
+            font-size: 14px; margin-bottom: 10px;
+        }
+        .home-footer__col a:hover { color: #fff; }
+        .home-footer__cta {
+            background: #fff; color: #0a0a0a; border-radius: 12px;
+            padding: 24px; display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .home-footer__cta h5 {
+            color: #0a0a0a; font-size: 14px; letter-spacing: 1px;
+            margin: 0 0 20px; line-height: 1.4;
+        }
+        .home-footer__cta a {
+            color: #0a0a0a; font-size: 12px; letter-spacing: 2px;
+            text-transform: uppercase; text-decoration: none;
+            border: 1px solid #0a0a0a; border-radius: 999px;
+            padding: 10px 18px; text-align: center;
+        }
+        .home-footer__bottom {
+            border-top: 1px solid #141414; padding-top: 24px;
+            display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+            font-size: 12px; color: #5a5a5a; letter-spacing: 2px; text-transform: uppercase;
+        }
+
+        @media (max-width: 700px) {
+            .home-hero, .home-section, .home-feature, .home-footer { padding-left: 20px; padding-right: 20px; }
+            .home-hero { min-height: 60vh; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Меню -->
+<div class="menu">
+    <img src="/images/logotipe.png" alt="ZEEKR">
+    <nav class="razdelu">
+        <a href="/cars.html">Модели</a>
+        <a href="/news.html">Новости</a>
+        <a href="/dealers.html">Дилеры</a>
+        <a href="/test_drives.html">Тест-драйвы</a>
+        <a href="/cards.html">Корзины</a>
+        <a href="/profile.html">Профиль</a>
+        <button id="logoutBtn" class="ghost" style="margin-left:20px; padding:10px 20px">Выйти</button>
+    </nav>
+</div>
+
+<!-- HERO -->
+<section class="home-hero" id="homeHero">
+    <div class="home-hero__eyebrow">Электрический характер</div>
+    <h1 id="heroTitle">ZEEKR 001</h1>
+    <p class="home-hero__sub" id="heroSub">
+        Роскошь shooting brake, переосмысленная для новой эры.
+        Высокая производительность, инновационный комфорт и дальние поездки.
+    </p>
+    <div class="home-hero__buttons">
+        <a href="/cars.html" class="btn-pill btn-pill--light">Конфигуратор</a>
+        <a href="/testdrives.html" class="btn-pill btn-pill--ghost">Записаться</a>
+    </div>
+</section>
+
+<!-- Статистика -->
+<section class="home-stats">
+    <div class="home-stat"><div class="home-stat__num">620 км</div><div class="home-stat__label">Запас хода</div></div>
+    <div class="home-stat"><div class="home-stat__num">3,8 с</div><div class="home-stat__label">Разгон 0–100</div></div>
+    <div class="home-stat"><div class="home-stat__num">400 кВт</div><div class="home-stat__label">Максимальная мощность</div></div>
+    <div class="home-stat"><div class="home-stat__num">30 мин</div><div class="home-stat__label">10–80% заряд</div></div>
+    <div class="home-stat"><div class="home-stat__num">539 л</div><div class="home-stat__label">Объём багажника</div></div>
+</section>
+
+<!-- Больше, чем автомобиль -->
+<section class="home-section">
+    <h2>Больше, чем <span class="light">электрический автомобиль</span></h2>
+    <p class="lead">ZEEKR сочетает выразительный дизайн, цифровую архитектуру и динамику, создавая новый стандарт ежедневного передвижения.</p>
+</section>
+
+<!-- Модели -->
+<section class="home-section home-section--dark">
+    <div class="home-eyebrow">Идеальный ряд</div>
+    <h2>Выберите свой ZEEKR</h2>
+    <p class="lead">Каждая модель — воплощение инженерной точности и премиального комфорта.</p>
+    <div class="home-models" id="homeModels">
+        <p class="cars-empty">Загрузка моделей...</p>
+    </div>
+</section>
+
+<!-- Feature -->
+<section class="home-feature" style="background-image:url('/images/007.jpg')">
+    <div class="home-feature__inner">
+        <div class="home-feature__eyebrow">Beyond Electric</div>
+        <h2>Технологии, которые становятся частью жизни.</h2>
+        <p>Интерфейс, медиа, комфорт и связь работают как единая цифровая среда — от маршрута до зарядки.</p>
+    </div>
+</section>
+
+<!-- Комфорт -->
+<section class="home-feature" style="background-image:url('/images/001.jpg')">
+    <div class="home-feature__inner">
+        <div class="home-feature__eyebrow">Комфорт</div>
+        <h2>Пространство, которое подстраивается под вас.</h2>
+        <p>Продуманная посадка, материалы высшего класса и цифровые сервисы превращают обычную поездку в личное пространство.</p>
+    </div>
+</section>
+
+<!-- Характеристики -->
+<section class="home-section">
+    <div class="home-eyebrow">Характеристики</div>
+    <h2>Электрическая мощность без компромиссов</h2>
+    <div class="home-stats" style="margin-top:40px;">
+        <div class="home-stat"><div class="home-stat__num">3,8 с</div><div class="home-stat__label">Разгон 0–100 км/ч</div></div>
+        <div class="home-stat"><div class="home-stat__num">400</div><div class="home-stat__label">кВт · общая мощность</div></div>
+        <div class="home-stat"><div class="home-stat__num">620</div><div class="home-stat__label">км · запас хода</div></div>
+        <div class="home-stat"><div class="home-stat__num">30</div><div class="home-stat__label">мин · до 80%</div></div>
+        <div class="home-stat"><div class="home-stat__num">539</div><div class="home-stat__label">литров · багажник</div></div>
+        <div class="home-stat"><div class="home-stat__num">22"</div><div class="home-stat__label">Колёса</div></div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="home-feature" style="background-image:url('/images/9X.jpg')">
+    <div class="home-feature__inner">
+        <div class="home-feature__eyebrow">Your next move</div>
+        <h2>Почувствуйте новый уровень электрической мобильности.</h2>
+        <p style="margin-bottom:24px;">Запишитесь на тест-драйв и почувствуйте ZEEKR в реальном движении — от первой секунды до полной остановки.</p>
+        <a href="/testdrives.html" class="btn-pill btn-pill--light">Записаться</a>
+    </div>
+</section>
+
+<!-- Конфигуратор -->
+<section class="home-section">
+    <div class="home-eyebrow">Конфигуратор</div>
+    <h2>Соберите свой ZEEKR</h2>
+    <p class="lead">Выберите модель, цвет и комплектацию — остальное мы подскажем.</p>
+
+    <div class="home-config">
+        <div class="home-config__left">
+            <div class="home-config__label">Модель</div>
+            <div class="home-config__models" id="configModels">
+                <!-- табы подтягиваются из API -->
+            </div>
+
+            <div class="home-config__label">Цвет</div>
+            <div class="home-config__colors" id="configColors">
+                <div class="home-config__color active" style="background:#e8e8e8" data-color="Crystal White"></div>
+                <div class="home-config__color" style="background:#3a3a3a" data-color="Graphite"></div>
+                <div class="home-config__color" style="background:#1e3a5f" data-color="Midnight Blue"></div>
+                <div class="home-config__color" style="background:#8fa3a8" data-color="Mist Grey"></div>
+            </div>
+            <div class="home-config__color-name" id="configColorName">Crystal White</div>
+        </div>
+
+        <div class="home-config__right">
+            <div>
+                <div class="home-config__label" style="color:#7a7a7a;">Стоимость</div>
+                <div class="home-config__price" id="configPrice">—</div>
+                <div class="home-config__price small" id="configPriceNote"></div>
+            </div>
+            <div class="home-config__cta">
+                <a href="/cars.html" class="btn-pill btn-pill--light" style="width:100%;">Собрать авто</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Новости -->
+<section class="home-section home-section--dark">
+    <div class="home-eyebrow">Последние новости</div>
+    <h2>Новости ZEEKR</h2>
+    <p class="lead">Главное о новых моделях, технологиях и мире электрической мобильности.</p>
+
+    <div class="home-news" id="homeNews">
+        <p class="cars-empty">Загрузка новостей...</p>
+    </div>
+</section>
+
+<!-- Контакт -->
+<section class="home-section">
+    <div class="home-eyebrow">Свяжитесь с нами</div>
+    <h2>Встречаемся на дороге.</h2>
+    <p class="lead">Выберите удобный город и оставьте контакты — менеджер свяжется с вами.</p>
+
+    <div class="home-contact">
+        <div class="home-contact__form">
+            <label style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7a7a7a;">
+                Выберите модель
+                <select id="contactModel" style="margin-top:8px;">
+                    <option value="">— выберите модель —</option>
+                </select>
+            </label>
+            <label style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7a7a7a;">
+                Город
+                <select id="contactCity" style="margin-top:8px;">
+                    <option value="">— выберите город —</option>
+                </select>
+            </label>
+            <label style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7a7a7a;">
+                Дата
+                <input type="date" id="contactDate" style="margin-top:8px;">
+            </label>
+            <button id="contactSubmit" class="btn-pill btn-pill--light" style="margin-top:8px;">Позвоните мне</button>
+        </div>
+
+        <div class="home-contact__info" id="contactInfo">
+            <h4>Москва</h4>
+            <p style="color:#a0a0a0;font-size:14px;line-height:1.6;margin:0 0 16px;">
+                Премиальные ZEEKR для знакомства,<br>Записи, тест-драйва и получения информации.
+            </p>
+            <a href="tel:+79954085941">+7 (995) 408-59-41</a>
+            <a href="mailto:info@zeekr.ru">info@zeekr.ru</a>
+            <div style="color:#7a7a7a;font-size:12px;letter-spacing:1.5px;margin-top:12px;">Пн–Вс · 09:00–21:00</div>
+        </div>
+    </div>
+</section>
+
+<!-- Футер -->
+<footer class="home-footer">
+    <div class="home-footer__grid">
+        <div class="home-footer__col">
+            <h5>Найти ZEEKR</h5>
+            <a href="/cars.html">Модели</a>
+            <a href="/dealers.html">Дилеры</a>
+            <a href="/cards.html">Корзины</a>
+            <a href="/test_drives.html">Тест-драйвы</a>
+        </div>
+        <div class="home-footer__col">
+            <h5>Модели</h5>
+            <a href="/cars.html">ZEEKR 001</a>
+            <a href="/cars.html">ZEEKR X</a>
+            <a href="/cars.html">ZEEKR 007</a>
+            <a href="/cars.html">ZEEKR 009</a>
+        </div>
+        <div class="home-footer__col">
+            <h5>О бренде</h5>
+            <a href="/news.html">Новости</a>
+            <a href="/profile.html">Профиль</a>
+        </div>
+        <div class="home-footer__cta">
+            <h5>Будущее начинается с движения.</h5>
+            <a href="/cars.html">Конфигуратор</a>
+        </div>
+    </div>
+    <div class="home-footer__bottom">
+        <span>ZEEKR</span>
+        <span>© 2026 All rights reserved</span>
+    </div>
+</footer>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="/js/api.js"></script>
+<script src="/js/index.js"></script>
+</body>
+</html>

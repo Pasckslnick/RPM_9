@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZEEKR · Регистрация</title>
+    <link rel="stylesheet" href="/css/zeekr.css">
+</head>
+<body>
+
+<div class="menu">
+    <img src="/images/logotipe.png" alt="ZEEKR">
+    <nav class="razdelu">
+        <a href="/">Главная</a>
+        <a href="/login.html">Войти</a>
+    </nav>
+</div>
+
+<div class="page">
+    <div class="auth-wrap card">
+        <h1>ZEEKR</h1>
+        <p class="subtitle">Create your account</p>
+
+        <div id="msg" style="display:none"></div>
+
+        <form id="registerForm" autocomplete="on">
+            <label>Логин
+                <input type="text" id="username" required minlength="3" maxlength="50" autocomplete="username">
+            </label>
+            <label>Email
+                <input type="email" id="email" required maxlength="120" autocomplete="email">
+            </label>
+            <label>Телефон
+                <input type="text" id="phone" required pattern="^\+?[0-9]{10,15}$"
+                       placeholder="89991234567" autocomplete="tel">
+            </label>
+            <label>Пароль
+                <div class="pw-field">
+                    <input type="password" id="password" required minlength="3" maxlength="100"
+                           autocomplete="new-password">
+                    <button type="button" class="pw-toggle" tabindex="-1" aria-label="Показать пароль"></button>
+                    <div class="pw-face facing" aria-hidden="true"></div>
+                </div>
+            </label>
+            <button type="submit" class="primary" style="width:100%">Создать аккаунт</button>
+        </form>
+
+        <div class="auth-link">
+            Уже есть аккаунт? <a href="/login.html">Войти</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const msgEl = document.getElementById('msg');
+        msgEl.style.display = 'none';
+
+        const pwInput = document.getElementById('password');
+        const password = (pwInput.realValue !== undefined)
+            ? pwInput.realValue
+            : pwInput.value;
+
+        const body = {
+            username: document.getElementById('username').value.trim(),
+            email:    document.getElementById('email').value.trim(),
+            phone:    document.getElementById('phone').value.trim(),
+            password: password
+        };
+
+        try {
+            const res = await fetch('http://localhost:8082/user-service/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            if (!res.ok) {
+                let msg = 'HTTP ' + res.status;
+                try { const d = await res.json(); msg = d.message || d.error || msg; } catch(_) {}
+                throw new Error(msg);
+            }
+
+            msgEl.className = 'auth-success';
+            msgEl.textContent = 'Регистрация успешна. Выполните вход...';
+            msgEl.style.display = 'block';
+
+            setTimeout(() => window.location.href = '/login.html', 800);
+        } catch (err) {
+            msgEl.className = 'auth-error';
+            msgEl.textContent = 'Ошибка регистрации: ' + err.message;
+            msgEl.style.display = 'block';
+        }
+    });
+</script>
+
+<script src="/js/password.js"></script>
+
+</body>
+</html>
