@@ -31,8 +31,7 @@ public class TestDrive {
     @Column(name = "test_drive_date", nullable = false)
     private LocalDate testDriveDate;
 
-    @NotBlank(message = "Статус обязателен")
-    @Size(min = 2, max = 100)
+    @Size(min = 2, max = 100, message = "Статус должен содержать от 2 до 100 символов")
     @Column(nullable = false, length = 100)
     private String status = "PENDING";
 

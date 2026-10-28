@@ -74,7 +74,6 @@ public class TestDriveService {
     public TestDrive update(Integer id, TestDrive updated) {
         TestDrive existing = findById(id);
 
-        existing.setUserId(updated.getUserId());
         existing.setCarModelId(updated.getCarModelId());
         existing.setDealerId(updated.getDealerId());
         existing.setTestDriveDate(updated.getTestDriveDate());

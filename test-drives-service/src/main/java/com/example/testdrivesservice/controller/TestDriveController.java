@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -63,7 +64,7 @@ public class TestDriveController {
     @GetMapping("/search")
     @Operation(summary = "Найти тест-драйвы по комментарию")
     public List<TestDrive> search(
-            @RequestParam String query,
+            @RequestParam @jakarta.validation.constraints.NotBlank String query,
             Authentication authentication
     ) {
         if (hasManagerRole(authentication)) {
@@ -96,10 +97,7 @@ public class TestDriveController {
             @Valid @RequestBody TestDrive testDrive,
             Authentication authentication
     ) {
-        if (!hasManagerRole(authentication)) {
-            service.findByIdForUser(
-                    id, service.getUserId(authentication.getName()));
-        }
+        requireManagerRole(authentication);
         return service.update(id, testDrive);
     }
 
@@ -110,11 +108,16 @@ public class TestDriveController {
             @PathVariable Integer id,
             Authentication authentication
     ) {
-        if (!hasManagerRole(authentication)) {
-            service.findByIdForUser(
-                    id, service.getUserId(authentication.getName()));
-        }
+        requireManagerRole(authentication);
         service.delete(id);
+    }
+
+    private void requireManagerRole(Authentication authentication) {
+        if (!hasManagerRole(authentication)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Изменять и удалять тест-драйвы могут только ADMIN и MANAGER");
+        }
     }
 
     private boolean hasManagerRole(Authentication authentication) {
