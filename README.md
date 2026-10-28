@@ -315,6 +315,16 @@ http://localhost:8082/car-service/api/car-models
 http://localhost:8082/test-drive-service/api/test-drives
 ```
 
+Эти URL нельзя проверять простым переходом по ссылке в браузере:
+`/api/auth/login` принимает только `POST`, а защищённые маршруты требуют
+заголовок `Authorization`. Для проверки через PowerShell используйте:
+
+Для Swagger откройте
+`http://localhost:8087/swagger-ui/index.html`, нажмите **Authorize** и
+передайте `Bearer <JWT-токен>`. Ответ `405 Method Not Allowed` на URL login
+означает, что был отправлен GET вместо POST. Ответ `401/403` на тест-драйвы
+без токена означает, что защищённый endpoint вызван без авторизации.
+
 Для проверки Circuit Breaker остановите соответствующий сервис и повторите
 запрос через Gateway: должен вернуться HTTP 503 с JSON fallback.
 
@@ -325,8 +335,4 @@ http://localhost:8082/test-drive-service/api/test-drives
 
 - `dealer-service`;
 - `news-service`;
-- централизованный сбор логов через ELK или Loki;
 - агрегацию Swagger через Gateway;
-- отдельные базы данных и REST/Feign-взаимодействие между сервисами.
-
-Эти пункты не нужны для минимального выполнения текущего задания.
