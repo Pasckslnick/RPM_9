@@ -15,10 +15,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -71,6 +76,17 @@ public class SecurityConfig {
                         ).authenticated()
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, exception) -> {
+                            log.warn("Authentication required for method={} path={}",
+                                    request.getMethod(), request.getRequestURI());
+                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                        })
+                        .accessDeniedHandler((request, response, exception) -> {
+                            log.warn("Access denied for method={} path={}",
+                                    request.getMethod(), request.getRequestURI());
+                            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        }))
                 .addFilterBefore(
                         jwtFilter,
                         UsernamePasswordAuthenticationFilter.class

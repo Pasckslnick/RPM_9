@@ -14,3 +14,10 @@ logs/
 .env
 **/.env
 *.local
+
+logs/
+*.log
+**/target/
+**/.idea/
+.env
+**/.env
