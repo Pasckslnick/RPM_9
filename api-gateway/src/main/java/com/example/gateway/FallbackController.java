@@ -29,4 +29,14 @@ public class FallbackController {
                         "message", "Сервис пользователей временно недоступен. Попробуйте позже."
                 ));
     }
+
+    @GetMapping("/fallback/test-drive")
+    public ResponseEntity<Map<String, String>> testDriveFallback() {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of(
+                        "service", "test-drives-service",
+                        "status", "unavailable",
+                        "message", "Сервис тест-драйвов временно недоступен. Попробуйте позже."
+                ));
+    }
 }

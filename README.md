@@ -15,6 +15,7 @@ practos_9/
 ├── api-gateway/         # Единая точка входа и маршрутизация
 ├── user-service/        # Пользователи, роли, регистрация и JWT
 ├── car-service/         # Модели автомобилей, комплектации и карточки
+├── test-drives-service/ # Записи на тест-драйвы
 ├── OLD PROJECT/         # Предыдущий монолит, не часть текущего запуска
 └── README.md            # Этот файл
 ```
@@ -26,13 +27,13 @@ practos_9/
 
 | Требование | Статус | Где смотреть |
 |---|---|---|
-| Минимум 3 микросервиса | НеГотово | `user-service`, `car-service`, `api-gateway` |
+| Минимум 3 микросервиса | Готово | `user-service`, `car-service`, `test-drives-service` |
 | Spring Cloud Config | Готово(не полностью) | `config-server` и `config-server/config-repo` |
 | Eureka Discovery | Готово | `eureka-server`, настройки в `config-repo/application.properties` |
 | API Gateway | Готово(необходимо добавить новые(не сделанные сервисы)) | `api-gateway`, маршруты в `config-repo/api-gateway.properties` |
 | Circuit Breaker | Готово | Gateway-фильтры CircuitBreaker + Resilience4j |
-| Actuator и базовое логирование | Частично готово | Actuator есть у всех сервисов; уровни логирования заданы в Config Repo |
-| Swagger/OpenAPI | Готово для доменных сервисов | `user-service` и `car-service` |
+| Actuator и базовое логирование | Готово | Actuator и rolling file logging подключены к доменным сервисам |
+| Swagger/OpenAPI | Готово для доменных сервисов | `user-service`, `car-service` и `test-drives-service` |
 | JWT-аутентификация | Готово | `user-service` выдаёт токен, оба доменных сервиса его проверяют |
 | Защищённый CRUD всей предметной базы | Готово в рамках текущих сущностей | CRUD-контроллеры users/roles и car-сущностей |
 | Общая Swagger-документация через Gateway | Не добавлена | Swagger доступен напрямую у `user-service` и `car-service` |
@@ -62,7 +63,8 @@ practos_9/
 - Настройки конкретных приложений:
   - `api-gateway.properties`;
   - `user-service.properties`;
-  - `car-service.properties`.
+  - `car-service.properties`;
+  - `test-drives-service.properties`.
 - Клиенты подключаются через
   `spring.config.import=configserver:http://localhost:8888`.
 - Быстрая проверка: открыть
@@ -115,7 +117,31 @@ CRUD-контроллеры:
 У каждого ресурса есть операции чтения, создания, изменения и удаления.
 Операции с карточками дополнительно проверяют роли `ADMIN`/`MANAGER`.
 
-### Шаг 5. API Gateway
+### Шаг 5. Test Drives Service
+
+Файл запуска: `test-drives-service/src/main/java/com/example/testdrivesservice/TestDrivesServiceApplication.java`
+
+- Порт: `8087`.
+- Регистрируется в Eureka как `TEST-DRIVES-SERVICE`.
+- Использует общую таблицу PostgreSQL `test_drives`.
+- Swagger UI: `http://localhost:8087/swagger-ui/index.html`.
+- OpenAPI JSON: `http://localhost:8087/v3/api-docs`.
+
+Основные маршруты:
+
+| Метод | Путь | Доступ |
+|---|---|---|
+| GET | `/api/test-drives`, `/api/test-drives/{id}` | свои записи; `ADMIN`/`MANAGER` — все |
+| GET | `/api/test-drives/my` | текущий пользователь |
+| GET | `/api/test-drives/search?query=...` | свои записи; `ADMIN`/`MANAGER` — все |
+| POST | `/api/test-drives` | авторизованный пользователь |
+| PUT/DELETE | `/api/test-drives/{id}` | `ADMIN`/`MANAGER` |
+
+Для обычного пользователя `userId` при создании берётся из JWT и не может
+быть подменён в теле запроса. Для связи с общей таблицей `users` сервис
+сопоставляет `username` из JWT с числовым идентификатором пользователя.
+
+### Шаг 6. API Gateway
 
 Файл запуска: `api-gateway/src/main/java/com/example/gateway/ApiGatewayApplication.java`
 
@@ -125,8 +151,10 @@ CRUD-контроллеры:
   сегмента пути.
 - `/user-service/**` перенаправляется в `USER-SERVICE` после удаления первого
   сегмента пути.
+- `/test-drive-service/**` перенаправляется в `TEST-DRIVES-SERVICE` после удаления
+  первого сегмента пути.
 - При недоступности сервиса Circuit Breaker направляет запрос на:
-  `/fallback/car` или `/fallback/user`.
+  `/fallback/car`, `/fallback/user` или `/fallback/test-drive`.
 - Проверка маршрутизации:
   `http://localhost:8082/user-service/api/auth/login` и
   `http://localhost:8082/car-service/api/car-models`.
@@ -158,10 +186,15 @@ cd ..\user-service
 cd ..\car-service
 .\mvnw.cmd spring-boot:run
 
-# 6. API Gateway
+# 6. Test Drives Service
+cd ..\test-drives-service
+.\mvnw.cmd spring-boot:run
+
+# 7. API Gateway
 cd ..\api-gateway
 .\mvnw.cmd spring-boot:run
 ```
 
 Порядок важен: Eureka должен быть доступен до регистрации клиентов, а
-Config Server — до запуска `user-service`, `car-service` и `api-gateway`.
+Config Server — до запуска `user-service`, `car-service`, `test-drives-service`
+и `api-gateway`.
