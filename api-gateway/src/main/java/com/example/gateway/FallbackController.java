@@ -39,4 +39,14 @@ public class FallbackController {
                         "message", "Сервис тест-драйвов временно недоступен. Попробуйте позже."
                 ));
     }
+
+    @GetMapping("/fallback/news")
+    public ResponseEntity<Map<String, String>> newsFallback() {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of(
+                        "service", "news-service",
+                        "status", "unavailable",
+                        "message", "Сервис новостей временно недоступен. Попробуйте позже."
+                ));
+    }
 }

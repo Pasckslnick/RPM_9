@@ -5,6 +5,7 @@ const API_BASE_URL = 'http://localhost:8082';
 const USER_SERVICE = '/user-service';
 const CAR_SERVICE = '/car-service';
 const TEST_DRIVES_SERVICE = '/test-drive-service';
+const NEWS_SERVICE = '/news-service';
 
 
 const AuthMe = {
@@ -122,7 +123,7 @@ function makeCrudApi(baseUrl) {
 
 
 const PositionsApi   = makeCrudApi(`${USER_SERVICE}/api/positions`);
-const NewsApi        = makeCrudApi('/news-service/api/news');
+const NewsApi        = makeCrudApi(`${NEWS_SERVICE}/api/news`);
 const UsersApi       = makeCrudApi(`${USER_SERVICE}/api/users`);
 const UserRolesApi   = makeCrudApi(`${USER_SERVICE}/api/roles`);
 const CarModelsApi   = makeCrudApi(`${CAR_SERVICE}/api/car-models`);

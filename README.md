@@ -1,7 +1,7 @@
 # RPM_9
 
 Учебное микросервисное приложение на Spring Cloud для работы с
-пользователями, автомобилями и тест-драйвами.
+пользователями, автомобилями, новостями и тест-драйвами.
 
 ## Архитектура
 
@@ -36,6 +36,7 @@ practos_9/
 ├── config-server/               # Централизованная конфигурация
 │   └── config-repo/
 ├── eureka-server/               # Регистрация и обнаружение сервисов
+├── news-service/                # Новости и публикации
 ├── test-drives-service/         # Записи на тест-драйвы
 ├── user-service/                # Пользователи, роли и авторизация
 ├── client-service/              # Веб-интерфейс
@@ -44,8 +45,8 @@ practos_9/
 
 ## Реализовано
 
-- три доменных микросервиса: `user-service`, `car-service`,
-  `test-drives-service`;
+- четыре доменных микросервиса: `user-service`, `car-service`,
+  `news-service`, `test-drives-service`;
 - централизованная конфигурация через Config Server;
 - регистрация и обнаружение сервисов через Eureka;
 - маршрутизация запросов через API Gateway;
@@ -54,9 +55,9 @@ practos_9/
 - базовое HTTP-логирование и ротация файлов логов;
 - Swagger/OpenAPI для доменных сервисов;
 - разграничение операций по ролям;
-- CRUD для пользователей, ролей, автомобилей и тест-драйвов;
+- CRUD для пользователей, ролей, автомобилей, новостей и тест-драйвов;
 - статический клиент с авторизацией, профилем, каталогом автомобилей и
-  страницей тест-драйвов;
+  страницами новостей и тест-драйвов;
 - клиент обращается к backend через API Gateway на порту `8082`.
 
 ## Сервисы и порты
@@ -70,6 +71,7 @@ practos_9/
 - `API-GATEWAY`;
 - `USER-SERVICE`;
 - `CAR-SERVICE`;
+- `NEWS-SERVICE`;
 - `TEST-DRIVES-SERVICE`.
 
 ### Config Server
@@ -84,6 +86,7 @@ practos_9/
 http://localhost:8888/user-service/default
 http://localhost:8888/car-service/default
 http://localhost:8888/test-drives-service/default
+http://localhost:8888/news-service/default
 ```
 
 ### API Gateway
@@ -94,6 +97,7 @@ http://localhost:8888/test-drives-service/default
 |---|---|
 | `/user-service/**` | `USER-SERVICE` |
 | `/car-service/**` | `CAR-SERVICE` |
+| `/news-service/**` | `NEWS-SERVICE` |
 | `/test-drive-service/**` | `TEST-DRIVES-SERVICE` |
 
 Пример маршрутизации:
@@ -155,6 +159,31 @@ Swagger: `http://localhost:8087/swagger-ui/index.html`
 Пользователи с ролями `MANAGER` и `ADMIN` могут работать с общим списком
 в соответствии со своими правами.
 
+### News Service — порт 8088
+
+Swagger: `http://localhost:8088/swagger-ui/index.html`
+
+Через Gateway:
+
+```text
+http://localhost:8082/news-service/api/news
+```
+
+Основные маршруты:
+
+| Метод | Путь |
+|---|---|
+| GET | `/api/news` |
+| GET | `/api/news/{id}` |
+| GET | `/api/news/search?keyword=...` |
+| POST | `/api/news` |
+| PUT | `/api/news/{id}` |
+| DELETE | `/api/news/{id}` |
+
+Все маршруты требуют Bearer-токен. Просмотр доступен авторизованным
+пользователям, создание и изменение — `MANAGER` и `ADMIN`, удаление — только
+`ADMIN`. Новости сортируются по дате публикации от новых к старым.
+
 ## Клиент
 
 Клиент находится в папке `client-service` и запускается как статический сайт.
@@ -180,7 +209,7 @@ http://localhost:5500/login.html
 ```
 
 Перед запуском клиента должны быть доступны Eureka, Config Server,
-доменные сервисы и API Gateway.
+доменные сервисы, включая News Service, и API Gateway.
 
 ## Логирование и мониторинг
 
@@ -198,6 +227,7 @@ http://localhost:5500/login.html
 http://localhost:8084/actuator/health
 http://localhost:8083/actuator/health
 http://localhost:8087/actuator/health
+http://localhost:8088/actuator/health
 ```
 
 Логи создаются в каталогах соответствующих сервисов, например:
@@ -252,7 +282,14 @@ cd "C:\Users\Артём\Desktop\MPT\3 КУРС\RPM_Chibuk\practos_9\test-drives-
 .\mvnw.cmd spring-boot:run
 ```
 
-### 7. API Gateway
+### 7. News Service
+
+```powershell
+cd "C:\Users\Артём\Desktop\MPT\3 КУРС\RPM_Chibuk\practos_9\news-service"
+.\mvnw.cmd spring-boot:run
+```
+
+### 8. API Gateway
 
 ```powershell
 cd "C:\Users\Артём\Desktop\MPT\3 КУРС\RPM_Chibuk\practos_9\api-gateway"
@@ -262,6 +299,13 @@ cd "C:\Users\Артём\Desktop\MPT\3 КУРС\RPM_Chibuk\practos_9\api-gateway"
 После запуска проверьте Eureka и затем запустите клиент из раздела выше.
 
 ## Проверка
+
+Сборка и тесты News Service:
+
+```powershell
+cd ".\news-service"
+.\mvnw.cmd test
+```
 
 Сборка и тесты сервиса тест-драйвов:
 

@@ -42,7 +42,8 @@ if (logoutBtn) {
 async function loadPermissions() {
     try {
         const me = await AuthMe.get();
-        permissions.canEdit = !!(me.isAdmin || me.isManager);
+        permissions.role = String(me.role || '').replace(/^ROLE_/, '').toUpperCase();
+        permissions.canEdit = permissions.role === 'ADMIN' || permissions.role === 'MANAGER';
         permissions.username = me.username || '';
     } catch (e) {
         permissions.canEdit = false;
@@ -52,7 +53,8 @@ async function loadPermissions() {
 // ---- Users (для select автора) ----
 async function loadUsers() {
     try {
-        const users = await UsersApi.getAll();
+        const response = await UsersApi.getAll();
+        const users = Array.isArray(response) ? response : response?.content;
         state.users = Array.isArray(users) ? users : [];
         itemAuthorEl.innerHTML = '<option value="">— выберите автора —</option>' +
             state.users.map(u =>
@@ -60,6 +62,8 @@ async function loadUsers() {
             ).join('');
     } catch (e) {
         state.users = [];
+        itemAuthorEl.innerHTML = '<option value="">Не удалось загрузить авторов</option>';
+        throw e;
     }
 }
 
@@ -99,9 +103,15 @@ function render() {
     }
 
     grid.innerHTML = pageItems.map(n => {
-        const author = n.author && n.author.username ? n.author.username : '';
+        const author = getAuthorName(n.authorId);
         const bg = n.image ? `background-image: url('${escapeAttr(n.image)}')` : '';
         const excerpt = (n.content || '').slice(0, 220);
+        const actions = permissions.canEdit
+            ? `<div class="news-card__actions">
+                   <button type="button" class="ghost news-edit" data-id="${n.id}">Изменить</button>
+                   ${isAdmin() ? `<button type="button" class="ghost news-delete" data-id="${n.id}">Удалить</button>` : ''}
+               </div>`
+            : '';
 
         return `
             <article class="news-card" data-id="${n.id}">
@@ -113,12 +123,22 @@ function render() {
                     </div>
                     <div class="news-card__excerpt">${escapeHtml(excerpt)}</div>
                     <div class="news-card__more">Читать далее →</div>
+                    ${actions}
                 </div>
             </article>
         `;
     }).join('');
 
     renderPagination();
+}
+
+function getAuthorName(authorId) {
+    const user = state.users.find(item => Number(item.id) === Number(authorId));
+    return user ? user.username : (authorId ? `Автор #${authorId}` : '');
+}
+
+function isAdmin() {
+    return String(permissions.role || '').replace(/^ROLE_/, '').toUpperCase() === 'ADMIN';
 }
 
 function renderPagination() {
@@ -134,6 +154,10 @@ function renderPagination() {
 
 // ---- Клик по карточке → статья ----
 grid.addEventListener('click', async (e) => {
+    const edit = e.target.closest('.news-edit');
+    if (edit) { await openEdit(Number(edit.dataset.id)); return; }
+    const remove = e.target.closest('.news-delete');
+    if (remove) { await removeNews(Number(remove.dataset.id)); return; }
     const card = e.target.closest('.news-card');
     if (!card) return;
     const id = Number(card.dataset.id);
@@ -151,7 +175,7 @@ paginationEl.addEventListener('click', (e) => {
 async function openArticle(id) {
     try {
         const item = await NewsApi.getById(id);
-        const author = item.author && item.author.username ? item.author.username : '';
+        const author = getAuthorName(item.authorId);
 
         articleImg.style.backgroundImage = item.image ? `url('${escapeAttr(item.image)}')` : 'none';
         articleTitle.textContent = item.title || '';
@@ -207,7 +231,7 @@ async function openEdit(id) {
         itemContentEl.value = item.content ?? '';
         itemImageEl.value = item.image ?? '';
         itemPublishDateEl.value = item.publishDate ?? '';
-        itemAuthorEl.value = item.author && item.author.id ? String(item.author.id) : '';
+        itemAuthorEl.value = item.authorId ? String(item.authorId) : '';
         modal.classList.remove('hidden');
     } catch (e) { showToast('Ошибка: ' + e.message, 'error'); }
 }
@@ -223,7 +247,7 @@ form.addEventListener('submit', async (e) => {
         content:     itemContentEl.value.trim(),
         image:       itemImageEl.value.trim(),
         publishDate: itemPublishDateEl.value,
-        author:      { id: authorId }
+        authorId
     };
 
     if (payload.title.length < 3) { showToast('Заголовок минимум 3 символа', 'error'); return; }
@@ -238,6 +262,18 @@ form.addEventListener('submit', async (e) => {
         await load();
     } catch (e) { showToast('Ошибка сохранения: ' + e.message, 'error'); }
 });
+
+async function removeNews(id) {
+    if (!isAdmin()) { showToast('Удаление доступно только ADMIN', 'error'); return; }
+    if (!window.confirm('Удалить эту новость?')) return;
+    try {
+        await NewsApi.remove(id);
+        showToast('Удалено', 'success');
+        await load();
+    } catch (e) {
+        showToast('Ошибка удаления: ' + e.message, 'error');
+    }
+}
 
 // ---- Утилиты ----
 function escapeHtml(s) {
